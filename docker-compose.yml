@@ -1,0 +1,46 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: email-database
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - email-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  email-api:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: email-backend
+    environment:
+      - APP_NAME=${APP_NAME}
+      - APP_VERSION=${APP_VERSION}
+      - DEBUG=${DEBUG}
+      - LOG_LEVEL=${LOG_LEVEL}
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/${POSTGRES_DB}
+      - API_V1_STR=${API_V1_STR}
+    ports:
+      - "${API_PORT}:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy  
+    networks:
+      - email-network
+
+volumes:
+  postgres_data:
+
+networks:
+  email-network:
+    driver: bridge
