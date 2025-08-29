@@ -63,7 +63,7 @@ class OpenAIIntegration:
             }
             
         except Exception as e:
-            print(f"Erro ao classificar email")
+            print("Erro ao classificar email")
             raise e
 
     def _parse_ai_response(self, ai_response: str) -> Dict[str, str]:
@@ -95,5 +95,5 @@ class OpenAIIntegration:
                     "suggested_reply": suggested_reply
                 }
         except Exception as e:
-            print(f"Erro ao processar resposta da IA")
+            print("Erro ao processar resposta da IA")
             raise e

@@ -33,7 +33,7 @@ async def submit_email(
             detail=f"Dados inválidos: {str(e)}"
         ) from e
     except Exception as e:
-        print(f"Erro ao processar email")
+        print(f"Erro ao processar email: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Erro interno do servidor"
@@ -65,7 +65,7 @@ async def list_submissions(
             detail=f"Parâmetros inválidos: {str(e)}"
         ) from e
     except Exception as e:
-        print(f"Erro ao buscar submissões")
+        print(f"Erro ao buscar submissões: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Erro interno do servidor"

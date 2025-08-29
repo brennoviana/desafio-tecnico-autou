@@ -22,7 +22,7 @@ class EmailService:
             submission = self.email_repository.create(email_data, ai_result)
             return EmailSubmissionResponse.model_validate(submission)
         except Exception as e:
-            print(f"Erro ao processar email")
+            print("Erro ao processar email")
             raise e
 
     async def get_submissions(self, skip: int, limit: int) -> EmailSubmissionList:
@@ -36,5 +36,5 @@ class EmailService:
                 total=total
             )
         except Exception as e:
-            print(f"Erro ao listar submissões")
+            print("Erro ao listar submissões")
             raise e
