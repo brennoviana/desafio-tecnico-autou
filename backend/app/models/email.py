@@ -10,10 +10,11 @@ class EmailSubmission(Base):
     __tablename__ = "email_submissions"
     
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(100), nullable=False)
-    email = Column(String(255), nullable=False)
+    email_title = Column(String(255), nullable=False)
     message = Column(Text, nullable=False)
+    ai_classification = Column(String(50), nullable=True)
+    ai_suggested_reply = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     
     def __repr__(self):
-        return f"<EmailSubmission(id={self.id}, name={self.name}, email={self.email})>"
+        return f"<EmailSubmission(id={self.id}, email_title={self.email_title}, classification={self.ai_classification})>"

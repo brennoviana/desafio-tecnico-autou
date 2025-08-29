@@ -1,5 +1,5 @@
 """Repositório para operações de banco de dados relacionadas a emails."""
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from sqlalchemy.orm import Session
 
 from app.models.email import EmailSubmission
@@ -13,12 +13,13 @@ class EmailRepository:
         """Inicializa o repositório com uma sessão de banco de dados."""
         self.db = db
     
-    def create(self, email_data: EmailSubmissionCreate) -> EmailSubmission:
+    def create(self, email_data: EmailSubmissionCreate, ai_data: Optional[Dict[str, Any]] = None) -> EmailSubmission:
         """Cria uma nova submissão de email no banco de dados."""
         db_email = EmailSubmission(
-            name=email_data.name,
-            email=email_data.email,
-            message=email_data.message
+            email_title=email_data.email_title,
+            message=email_data.message,
+            ai_classification=ai_data.get("classification") if ai_data else None,
+            ai_suggested_reply=ai_data.get("suggested_reply") if ai_data else None
         )
         self.db.add(db_email)
         self.db.commit()

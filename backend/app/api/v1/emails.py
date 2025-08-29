@@ -5,9 +5,10 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.schemas.email import EmailSubmissionCreate, EmailSubmissionResponse, EmailSubmissionList
 from app.services.email_service import EmailService
+from app.integration.ai import OpenAIIntegration
+
 
 router = APIRouter()
-Session = Depends(get_db)
 
 @router.post("/", response_model=EmailSubmissionResponse, status_code=status.HTTP_201_CREATED)
 async def submit_email(
@@ -15,9 +16,8 @@ async def submit_email(
     db: Session = Depends(get_db)
 ):
     """Cria uma nova submissão de email."""
-    service = EmailService(db)
-
     try:
+        service = EmailService(db, OpenAIIntegration())
         result = await service.submit_email(email_data)
         return result
     except Exception as e:
@@ -34,12 +34,12 @@ async def list_submissions(
     db: Session = Depends(get_db)
 ):
     """Lista submissões com paginação (máx. 100)."""
-    if limit > 100:
-        limit = 100
-
-    service = EmailService(db)
-
     try:
+        if limit > 100:
+            limit = 100
+
+        service = EmailService(db)
+
         result = await service.get_submissions(skip=skip, limit=limit)
         return result
     except Exception as e:

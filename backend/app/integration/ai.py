@@ -1,12 +1,13 @@
 """Serviço de IA para classificação e processamento de emails."""
-from typing import Optional
+from typing import Optional, Dict, Any
+import re
 from openai import OpenAI
 from openai.types.chat import ChatCompletion
 
 from app.core.config import settings
 
 
-class AIService:
+class OpenAIIntegration:
     """Serviço para operações de IA utilizando OpenAI."""
 
     def __init__(self):
@@ -16,7 +17,7 @@ class AIService:
         
         self.client = OpenAI(api_key=settings.openai_api_key)
 
-    async def classify_email(self, email_text: str) -> Optional[str]:
+    async def classify_email(self, email_text: str) -> Dict[str, Any]:
         """
         Classifica um email como PRODUTIVO ou IMPRODUTIVO e sugere uma resposta.
         
@@ -24,7 +25,7 @@ class AIService:
             email_text: Texto do email a ser classificado
             
         Returns:
-            Resultado da classificação e sugestão de resposta
+            Dicionário com classificação, resposta completa da IA e sugestão extraída
             
         Raises:
             ValueError: Se o texto do email estiver vazio
@@ -57,7 +58,15 @@ class AIService:
                 max_tokens=500
             )
             
-            return response.choices[0].message.content
+            ai_response = response.choices[0].message.content
+            
+            # Extrair classificação e sugestão da resposta
+            parsed_response = self._parse_ai_response(ai_response)
+            
+            return {
+                "classification": parsed_response["classification"],
+                "suggested_reply": parsed_response["suggested_reply"]
+            }
             
         except Exception as e:
             print(f"Erro ao classificar email: {str(e)}")
@@ -69,3 +78,34 @@ class AIService:
                 raise Exception("Limite de taxa da API OpenAI excedido. Tente novamente em alguns segundos.")
             else:
                 raise Exception(f"Erro na API OpenAI: {str(e)}")
+
+    def _parse_ai_response(self, ai_response: str) -> Dict[str, str]:
+        """
+        Extrai a classificação e sugestão de resposta da resposta da IA.
+        
+        Args:
+            ai_response: Resposta completa da IA
+            
+        Returns:
+            Dicionário com classificação e sugestão extraídas
+        """
+        if not ai_response:
+            return {"classification": "INDEFINIDO", "suggested_reply": "Erro no processamento"}
+        
+        # Extrair classificação
+        classification_match = re.search(r'Categoria:\s*(Produtivo|Improdutivo|PRODUTIVO|IMPRODUTIVO)', ai_response, re.IGNORECASE)
+        classification = classification_match.group(1).upper() if classification_match else "INDEFINIDO"
+        
+        # Extrair sugestão de resposta
+        suggestion_match = re.search(r'Sugestão de resposta:\s*(.+?)(?:\n|$)', ai_response, re.DOTALL)
+        if suggestion_match:
+            suggested_reply = suggestion_match.group(1).strip()
+            # Limpar possíveis aspas
+            suggested_reply = suggested_reply.strip('"').strip("'")
+        else:
+            suggested_reply = "Nenhuma sugestão extraída"
+        
+        return {
+            "classification": classification,
+            "suggested_reply": suggested_reply
+        }
