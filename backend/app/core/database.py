@@ -41,6 +41,6 @@ class DatabaseManager:
 
 db_manager = DatabaseManager()
 
-def get_db() -> Generator[Session, None, None]:
+def get_db_session() -> Generator[Session, None, None]:
     """Fornece uma sessão de banco de dados por request e garante o fechamento."""
     yield from db_manager.get_session()
