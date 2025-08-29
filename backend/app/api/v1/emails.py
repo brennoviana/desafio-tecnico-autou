@@ -23,9 +23,10 @@ async def submit_email(
         result = await service.submit_email(email_data)
         return result
     except Exception as e:
+        print(f"Erro ao processar email: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Erro ao processar email: {str(e)}"
+            detail=f"Erro ao processar email"
         ) from e
 
 
@@ -46,7 +47,8 @@ async def list_submissions(
         result = await service.get_submissions(skip=skip, limit=limit)
         return result
     except Exception as e:
+        print(f"Erro ao buscar submissões: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Erro ao buscar submissões: {str(e)}"
+            detail=f"Erro ao buscar submissões"
         ) from e
