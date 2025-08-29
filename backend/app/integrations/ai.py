@@ -12,9 +12,6 @@ class OpenAIIntegration:
 
     def __init__(self):
         """Inicializa o serviço de IA com a configuração da API."""
-        if not settings.openai_api_key:
-            raise ValueError("OPENAI_API_KEY não configurada nas variáveis de ambiente")
-        
         self.client = OpenAI(api_key=settings.openai_api_key)
 
     async def classify_email(self, email_text: str) -> Dict[str, Any]:
@@ -58,7 +55,6 @@ class OpenAIIntegration:
             
             ai_response = response.choices[0].message.content
             
-            # Extrair classificação e sugestão da resposta
             parsed_response = self._parse_ai_response(ai_response)
             
             return {
@@ -90,7 +86,6 @@ class OpenAIIntegration:
             suggestion_match = re.search(r'Sugestão de resposta:\s*(.+?)(?:\n|$)', ai_response, re.DOTALL)
             if suggestion_match:
                 suggested_reply = suggestion_match.group(1).strip()
-                # Limpar possíveis aspas
                 suggested_reply = suggested_reply.strip('"').strip("'")
             else:
                 suggested_reply = "Nenhuma sugestão extraída"
