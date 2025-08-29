@@ -20,6 +20,8 @@ class EmailSubmissionResponse(BaseModel):
     message: str
     created_at: datetime
 
+    model_config = {"from_attributes": True}
+
 class EmailSubmissionList(BaseModel):
     """Schema para lista de submissões de email."""
 
