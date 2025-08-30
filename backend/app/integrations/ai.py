@@ -1,5 +1,5 @@
 """Serviço de IA para classificação e processamento de emails."""
-from typing import Optional, Dict, Any
+from typing import Dict, Any
 import re
 from openai import OpenAI
 from openai.types.chat import ChatCompletion

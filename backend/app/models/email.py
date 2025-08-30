@@ -12,6 +12,7 @@ class EmailSubmission(Base):
     id = Column(Integer, primary_key=True, index=True)
     email_title = Column(String(255), nullable=False)
     message = Column(Text, nullable=False)
+    type = Column(String(20), nullable=False, default="text")
     ai_classification = Column(String(50), nullable=True)
     ai_suggested_reply = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)

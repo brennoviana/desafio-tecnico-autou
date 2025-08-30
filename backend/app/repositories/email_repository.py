@@ -13,13 +13,14 @@ class EmailRepository:
         """Inicializa o repositório com uma sessão de banco de dados."""
         self.db = db
     
-    def create(self, email_data: EmailSubmissionCreate, ai_data: Optional[Dict[str, Any]] = None) -> EmailSubmission:
+    def create(self, email_data: EmailSubmissionCreate, ai_data: Dict[str, Any]) -> EmailSubmission:
         """Cria uma nova submissão de email no banco de dados."""
         db_email = EmailSubmission(
             email_title=email_data.email_title,
-            message=email_data.message,
-            ai_classification=ai_data.get("classification") if ai_data else None,
-            ai_suggested_reply=ai_data.get("suggested_reply") if ai_data else None
+            message=email_data.content,
+            type=email_data.type,
+            ai_classification=ai_data.get("classification"),
+            ai_suggested_reply=ai_data.get("suggested_reply")
         )
         self.db.add(db_email)
         self.db.commit()

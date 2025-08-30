@@ -1,7 +1,10 @@
 """Serviços de lógica de negócio para emails."""
+from typing import Optional
+from fastapi import UploadFile
 from app.schemas.email import EmailSubmissionCreate, EmailSubmissionResponse, EmailSubmissionList
 from app.integrations.ai import OpenAIIntegration
 from app.repositories.email_repository import EmailRepository
+from app.utils.file_processor import FileProcessor
 
 
 class EmailService:
@@ -12,17 +15,78 @@ class EmailService:
         self.email_repository = email_repository
         self.ai_integration = ai_integration
 
-    async def submit_email(self, email_data: EmailSubmissionCreate) -> EmailSubmissionResponse:
-        """Cria uma nova submissão de email no repositório com classificação de IA."""
-        ai_result = None
-        
+    async def submit_text_email(
+        self, 
+        email_title: str,
+        content: str
+    ) -> EmailSubmissionResponse:
+        """Cria submissão de email a partir de texto direto."""
         try:
-            ai_result = await self.ai_integration.classify_email(email_data.message)
+            if not content or not content.strip():
+                raise ValueError("Conteúdo não pode estar vazio")
+            
+            email_data = EmailSubmissionCreate(
+                email_title=email_title,
+                content=content.strip(),
+                type="string"
+            )
+            
+            ai_result = await self.ai_integration.classify_email(email_data.content)
 
             submission = self.email_repository.create(email_data, ai_result)
             return EmailSubmissionResponse.model_validate(submission)
+            
+        except ValueError as e:
+            raise e
         except Exception as e:
-            print("Erro ao processar email")
+            print(f"Erro ao processar email de texto: {str(e)}")
+            raise e
+
+    async def submit_file_email(
+        self, 
+        email_title: str,
+        file: UploadFile
+    ) -> EmailSubmissionResponse:
+        """Cria submissão de email a partir de arquivo (.txt ou .pdf)."""
+        try:
+            if not file.filename:
+                raise ValueError("Nome do arquivo é obrigatório")
+            
+            file_extension = file.filename.lower().split('.')[-1]
+            if file_extension not in ['txt', 'pdf']:
+                raise ValueError("Apenas arquivos .txt e .pdf são aceitos")
+            
+            FileProcessor.validate_file_size(file, max_size_mb=5)
+            
+            if file_extension == 'txt':
+                final_content = FileProcessor._extract_text_from_txt(file)
+                file_type = "txt"
+            elif file_extension == 'pdf':
+                final_content = FileProcessor._extract_text_from_pdf(file)
+                file_type = "pdf"
+            else:
+                raise ValueError("Tipo de arquivo não suportado")
+            
+            FileProcessor.validate_text_length(final_content)
+            
+            if not final_content or not final_content.strip():
+                raise ValueError("Não foi possível extrair conteúdo do arquivo")
+            
+            email_data = EmailSubmissionCreate(
+                email_title=email_title,
+                content=final_content.strip(),
+                type=file_type
+            )
+            
+            ai_result = await self.ai_integration.classify_email(email_data.content)
+
+            submission = self.email_repository.create(email_data, ai_result)
+            return EmailSubmissionResponse.model_validate(submission)
+            
+        except ValueError as e:
+            raise e
+        except Exception as e:
+            print(f"Erro ao processar email de arquivo: {str(e)}")
             raise e
 
     async def get_submissions(self, skip: int, limit: int) -> EmailSubmissionList:
