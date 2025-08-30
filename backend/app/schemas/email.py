@@ -21,7 +21,7 @@ class EmailSubmissionCreate(BaseModel):
 
     email_title: str = Field(..., min_length=2, max_length=255, description="Título do email")
     content: str = Field(..., min_length=10, max_length=1000, description="Conteúdo da mensagem")
-    type: Literal["string", "txt", "pdf"] = Field(..., description="Tipo de entrada do conteúdo")
+    type: Literal["Texto puro", "TXT", "PDF"] = Field(..., description="Tipo de entrada do conteúdo")
 
 
 class EmailSubmissionResponse(BaseModel):

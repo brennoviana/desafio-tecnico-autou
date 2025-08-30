@@ -28,7 +28,7 @@ class EmailService:
             email_data = EmailSubmissionCreate(
                 email_title=email_title,
                 content=content.strip(),
-                type="string"
+                type="Texto puro"
             )
             
             ai_result = self.ai_integration.classify_email(email_data.content)
@@ -60,10 +60,10 @@ class EmailService:
             
             if file_extension == 'txt':
                 final_content = FileProcessor._extract_text_from_txt(file)
-                file_type = "txt"
+                file_type = "TXT"
             elif file_extension == 'pdf':
                 final_content = FileProcessor._extract_text_from_pdf(file)
-                file_type = "pdf"
+                file_type = "PDF"
             else:
                 raise ValueError("Tipo de arquivo não suportado")
             

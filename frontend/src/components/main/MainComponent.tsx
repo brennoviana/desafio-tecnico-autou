@@ -3,7 +3,6 @@ import { Button, Flex, Table } from 'antd';
 import type { TableColumnsType, TableProps } from 'antd';
 import ModalComponent from '../modal/ModalComponent';
 import { EmailApi } from '../../api/email-api';
-import type { EmailResponse } from '../../api/email-api';
 
 type TableRowSelection<T extends object = object> = TableProps<T>['rowSelection'];
 
@@ -14,7 +13,8 @@ interface EmailType {
   type: string;
   ai_classification: string;
   ai_suggested_reply: string;
-  createdAt: string;
+  created_at: string;
+  key: string;
 }
 
 const columns: TableColumnsType<EmailType> = [
@@ -23,7 +23,20 @@ const columns: TableColumnsType<EmailType> = [
   { title: 'Tipo', dataIndex: 'type' },
   { title: 'Classificação', dataIndex: 'ai_classification' },
   { title: 'Resposta Sugerida', dataIndex: 'ai_suggested_reply' },
-  { title: 'Criado Em', dataIndex: 'createdAt' },
+  { 
+    title: 'Criado Em', 
+    dataIndex: 'created_at',
+    render: (text: string) => {
+      if (!text) return '-';
+      return new Date(text).toLocaleString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+  },
 ];
 
 const MainComponent: React.FC = () => {
@@ -34,7 +47,11 @@ const MainComponent: React.FC = () => {
   const fetchData = async () => {
     const emailApi = new EmailApi();
     const data = await emailApi.getEmails(0, 10);
-    setDataSource(data.submissions);
+    const dataWithKeys = data.submissions.map((item: EmailType, index: number) => ({
+      ...item,
+      key: item.id || `email-${index}`
+    }));
+    setDataSource(dataWithKeys);
   };
 
   useEffect(() => {
@@ -74,7 +91,13 @@ const MainComponent: React.FC = () => {
         )}
         {hasSelected ? `Selected ${selectedRowKeys.length} items` : null}
       </Flex>
-      <Table<EmailType> rowSelection={rowSelection} columns={columns} dataSource={dataSource} />
+      <Table<EmailType>  
+        bordered 
+        rowSelection={rowSelection} 
+        columns={columns} 
+        dataSource={dataSource} 
+        loading={loading}
+      />
     </Flex>
   );
 };

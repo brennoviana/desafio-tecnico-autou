@@ -34,7 +34,6 @@ class DatabaseManager:
     def create_tables(self, drop_first: bool = False):
         """Cria todas as tabelas no banco de dados."""
         if drop_first:
-            # Remove todas as tabelas existentes e recria
             Base.metadata.drop_all(bind=self.engine)
         Base.metadata.create_all(bind=self.engine)
 
