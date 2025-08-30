@@ -89,11 +89,11 @@ class EmailService:
             print(f"Erro ao processar email de arquivo: {str(e)}")
             raise e
 
-    async def get_submissions(self, skip: int, limit: int) -> EmailSubmissionList:
-        """Lista submissões com paginação e contagem total."""
+    async def get_submissions(self, skip: int, limit: int, email_title: Optional[str] = None) -> EmailSubmissionList:
+        """Lista submissões com paginação, contagem total e filtro opcional por título."""
         try:
-            submissions = self.email_repository.get_all(skip=skip, limit=limit)
-            total = self.email_repository.count()
+            submissions = self.email_repository.get_all(skip=skip, limit=limit, email_title=email_title)
+            total = self.email_repository.count(email_title=email_title)
 
             return EmailSubmissionList(
                 submissions=[EmailSubmissionResponse.model_validate(sub) for sub in submissions],

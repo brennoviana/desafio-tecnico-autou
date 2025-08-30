@@ -1,6 +1,7 @@
 """Endpoints da API para submissão e listagem de emails."""
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Query
 from sqlalchemy.orm import Session
+from typing import Optional
 
 from app.core.database import get_db_session
 from app.schemas.email import EmailSubmissionResponse, EmailSubmissionList, TextEmailRequest, FileEmailRequest
@@ -89,9 +90,10 @@ async def submit_file_email(
 async def list_submissions(
     skip: int,
     limit: int,
+    email_title: Optional[str] = Query(None, description="Filtro por título do email"),
     db: Session = Depends(get_db_session)
 ):
-    """Lista submissões com paginação (máx. 100)."""
+    """Lista submissões com paginação (máx. 100) e filtro opcional por título."""
     try:
         if skip < 0:
             raise ValueError("Parâmetro 'skip' deve ser maior ou igual a zero")
@@ -100,7 +102,7 @@ async def list_submissions(
 
         email_repository = EmailRepository(db)
         service = EmailService(email_repository)
-        result = await service.get_submissions(skip=skip, limit=limit)
+        result = await service.get_submissions(skip=skip, limit=limit, email_title=email_title)
         return result
     except ValueError as e:
         raise HTTPException(

@@ -1,8 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import { Button, Flex, Table } from 'antd';
+import React, { useEffect, useState, useCallback } from 'react';
+import { Button, Flex, Table, Input } from 'antd';
+import { SearchOutlined } from '@ant-design/icons';
 import type { TableColumnsType, TableProps } from 'antd';
 import ModalComponent from '../modal/ModalComponent';
 import { EmailApi } from '../../api/email-api';
+
+const { Search } = Input;
 
 type TableRowSelection<T extends object = object> = TableProps<T>['rowSelection'];
 
@@ -46,6 +49,8 @@ const MainComponent: React.FC = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [loading, setLoading] = useState(false);
   const [dataSource, setDataSource] = useState<EmailType[]>([]);
+  const [searchText, setSearchText] = useState('');
+  const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 5,
@@ -56,11 +61,17 @@ const MainComponent: React.FC = () => {
       `${range[0]}-${range[1]} de ${total} itens`,
   });
 
-  const fetchData = async (page: number = 1, pageSize: number = 5) => {
+  const fetchData = async (page: number = 1, pageSize: number = 5, searchTitle: string = '') => {
     setLoading(true);
     try {
       const skip = (page - 1) * pageSize;
-      const data = await emailApi.getEmails(skip, pageSize);
+      let data;
+      
+      if (searchTitle.trim()) {
+        data = await emailApi.searchEmails(skip, pageSize, searchTitle);
+      } else {
+        data = await emailApi.getEmails(skip, pageSize);
+      }
       
       const dataWithKeys = data.submissions.map((item: EmailType) => ({
         ...item,
@@ -81,13 +92,59 @@ const MainComponent: React.FC = () => {
     }
   };
 
+  const debouncedSearch = useCallback((value: string) => {
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
+
+    const newTimeout = setTimeout(() => {
+      setSearchText(value);
+      setPagination(prev => ({ ...prev, current: 1 }));
+      fetchData(1, pagination.pageSize, value);
+    }, 500);
+
+    setSearchTimeout(newTimeout);
+  }, [searchTimeout, pagination.pageSize]);
+
+  const handleSearch = (value: string) => {
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+      setSearchTimeout(null);
+    }
+    setSearchText(value);
+    setPagination(prev => ({ ...prev, current: 1 }));
+    fetchData(1, pagination.pageSize, value);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    
+    if (!value.trim()) {
+      if (searchTimeout) {
+        clearTimeout(searchTimeout);
+        setSearchTimeout(null);
+      }
+      handleSearch('');
+    } else {
+      debouncedSearch(value);
+    }
+  };
+
   const handleTableChange = (page: number, pageSize: number) => {
-    fetchData(page, pageSize);
+    fetchData(page, pageSize, searchText);
   };
 
   useEffect(() => {
     fetchData();
   }, []);
+
+  useEffect(() => {
+    return () => {
+      if (searchTimeout) {
+        clearTimeout(searchTimeout);
+      }
+    };
+  }, [searchTimeout]);
 
   const start = () => {
     setLoading(true);
@@ -111,21 +168,35 @@ const MainComponent: React.FC = () => {
 
   return (
     <Flex gap="middle" vertical>
-      <Flex align="center" gap="middle">
-        {hasSelected ? (
-          <Button type="primary" onClick={start} disabled={!hasSelected} loading={loading}>
-            Delete
-          </Button>
-          ) : (
-            <ModalComponent />
-        )}
-        {hasSelected ? `Selected ${selectedRowKeys.length} items` : null}
+      <Flex align="center" gap="middle" justify="space-between">
+        <Flex align="center" gap="middle">
+          {hasSelected ? (
+            <Button type="primary" onClick={start} disabled={!hasSelected} loading={loading}>
+              Delete
+            </Button>
+            ) : (
+              <ModalComponent />
+          )}
+          {hasSelected ? `Selected ${selectedRowKeys.length} items` : null}
+        </Flex>
+        
+        <Search
+          placeholder="Pesquisar por título do email..."
+          allowClear
+          enterButton={<SearchOutlined />}
+          size="middle"
+          style={{ width: 300 }}
+          onSearch={handleSearch}
+          onChange={handleInputChange}
+          loading={loading}
+        />
       </Flex>
+      
       <Table<EmailType>  
         bordered 
         rowSelection={rowSelection} 
         columns={columns} 
-        dataSource={dataSource} 
+        dataSource={dataSource}
         loading={loading}
         pagination={{
           ...pagination,

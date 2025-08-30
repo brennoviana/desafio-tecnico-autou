@@ -1,4 +1,3 @@
-
 export class EmailApi  {
   private baseUrl: string;
   constructor() {
@@ -7,6 +6,16 @@ export class EmailApi  {
 
   async getEmails(skip: number, limit: number) : Promise<EmailResponse> {
     const response = await fetch(`${this.baseUrl}/emails?skip=${skip}&limit=${limit}`);
+    return response.json();
+  }
+
+  async searchEmails(skip: number, limit: number, email_title: string) : Promise<EmailResponse> {
+    const params = new URLSearchParams({
+      skip: skip.toString(),
+      limit: limit.toString(),
+      email_title: email_title
+    });
+    const response = await fetch(`${this.baseUrl}/emails?${params}`);
     return response.json();
   }
 }

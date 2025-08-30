@@ -31,10 +31,20 @@ class EmailRepository:
         """Busca uma submissão de email pelo ID."""
         return self.db.query(EmailSubmission).filter(EmailSubmission.id == email_id).first()
     
-    def get_all(self, skip: int = 0, limit: int = 100) -> List[EmailSubmission]:
-        """Lista submissões com paginação."""
-        return self.db.query(EmailSubmission).offset(skip).limit(limit).all()
+    def get_all(self, skip: int = 0, limit: int = 100, email_title: Optional[str] = None) -> List[EmailSubmission]:
+        """Lista submissões com paginação e filtro opcional por título."""
+        query = self.db.query(EmailSubmission)
+        
+        if email_title:
+            query = query.filter(EmailSubmission.email_title.ilike(f"%{email_title}%"))
+        
+        return query.offset(skip).limit(limit).all()
     
-    def count(self) -> int:
-        """Retorna o total de submissões no banco de dados."""
-        return self.db.query(EmailSubmission).count()
+    def count(self, email_title: Optional[str] = None) -> int:
+        """Retorna o total de submissões no banco de dados com filtro opcional por título."""
+        query = self.db.query(EmailSubmission)
+        
+        if email_title:
+            query = query.filter(EmailSubmission.email_title.ilike(f"%{email_title}%"))
+        
+        return query.count()
