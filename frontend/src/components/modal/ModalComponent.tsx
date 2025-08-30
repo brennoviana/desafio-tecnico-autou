@@ -27,10 +27,10 @@ const ModalComponent: React.FC = () => {
   return (
     <>
       <Button type="primary" onClick={showModal}>
-        Create
+        Processar
       </Button>
       <Modal
-        title="Title"
+        title="Titulo"
         open={open}
         onOk={handleOk}
         confirmLoading={confirmLoading}

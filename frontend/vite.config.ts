@@ -7,7 +7,7 @@ export default defineConfig({
   // Environment variables configuration
   envPrefix: 'VITE_',
   server: {
-    port: 3000,
+    port: 5173,
     host: true
   },
   build: {
