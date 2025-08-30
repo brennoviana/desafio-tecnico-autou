@@ -29,6 +29,7 @@ services:
       - DEBUG=${DEBUG}
       - LOG_LEVEL=${LOG_LEVEL}
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/${POSTGRES_DB}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
       - API_V1_STR=${API_V1_STR}
     ports:
       - "${API_PORT}:8000"

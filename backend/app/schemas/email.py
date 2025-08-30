@@ -1,7 +1,7 @@
 """Schemas para validação de dados de email."""
 from datetime import datetime
 from typing import Optional, Literal
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, Field
 
 
 class TextEmailRequest(BaseModel):
@@ -10,6 +10,17 @@ class TextEmailRequest(BaseModel):
     email_title: str = Field(..., min_length=2, max_length=255, description="Título do email")
     content: str = Field(..., min_length=10, max_length=10000, description="Conteúdo da mensagem")
 
+
+class FileEmailRequest(BaseModel):
+    """Schema para submissão de email via arquivo."""
+    
+    email_title: str = Field(..., min_length=2, max_length=255, description="Título do email")
+
+class ListEmailRequest(BaseModel):
+    """Schema para lista de submissões de email."""
+    
+    skip: int = Field(..., description="Número de submissões a pular")
+    limit: int = Field(..., description="Número máximo de submissões a retornar")   
 
 class EmailSubmissionCreate(BaseModel):
     """Schema para criação de uma nova submissão de email."""

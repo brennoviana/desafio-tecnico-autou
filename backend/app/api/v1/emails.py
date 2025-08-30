@@ -1,10 +1,9 @@
 """Endpoints da API para submissão e listagem de emails."""
-from typing import Optional, Union
-from fastapi import APIRouter, Depends, HTTPException, status, Form, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db_session
-from app.schemas.email import EmailSubmissionCreate, EmailSubmissionResponse, EmailSubmissionList, TextEmailRequest
+from app.schemas.email import EmailSubmissionResponse, EmailSubmissionList, TextEmailRequest, FileEmailRequest, ListEmailRequest
 from app.services.email_service import EmailService
 from app.integrations.ai import OpenAIIntegration
 from app.repositories.email_repository import EmailRepository
@@ -25,6 +24,10 @@ async def submit_text_email(
     - content: conteúdo do email como texto direto
     """
     try:
+
+        if not request.email_title or not request.content:
+            raise ValueError("Título e conteúdo são obrigatórios")
+        
         email_repository = EmailRepository(db)
         service = EmailService(email_repository, OpenAIIntegration())
         result = await service.submit_text_email(
@@ -47,7 +50,7 @@ async def submit_text_email(
 
 @router.post("/file", response_model=EmailSubmissionResponse, status_code=status.HTTP_201_CREATED)
 async def submit_file_email(
-    email_title: str = Form(..., min_length=2, max_length=255, description="Título do email"),
+    request: FileEmailRequest,
     file: UploadFile = File(..., description="Arquivo .txt ou .pdf"),
     db: Session = Depends(get_db_session)
 ):
@@ -55,14 +58,17 @@ async def submit_file_email(
     Cria uma nova submissão de email a partir de arquivo (.txt ou .pdf).
     
     Parâmetros:
-    - email_title: título do email
+    - request: dados do email (email_title)
     - file: arquivo .txt ou .pdf contendo o conteúdo do email
     """
     try:
+        if not request.email_title:
+            raise ValueError("Título é obrigatório")
+            
         email_repository = EmailRepository(db)
         service = EmailService(email_repository, OpenAIIntegration())
         result = await service.submit_file_email(
-            email_title=email_title,
+            email_title=request.email_title,
             file=file
         )
         return result
@@ -79,20 +85,22 @@ async def submit_file_email(
         ) from e
 
 
-@router.get("/", response_model=EmailSubmissionList)
+@router.get("/", response_model=EmailSubmissionList, status_code=status.HTTP_200_OK)
 async def list_submissions(
-    skip: int = 0,
-    limit: int = 100,
+    request: ListEmailRequest,
     db: Session = Depends(get_db_session)
 ):
     """Lista submissões com paginação (máx. 100)."""
     try:
+        skip = request.skip
+        limit = request.limit
+
+        
         if skip < 0:
             raise ValueError("Parâmetro 'skip' deve ser maior ou igual a zero")
-        if limit <= 0:
+        if limit <= 0 or limit > 100:
             raise ValueError("Parâmetro 'limit' deve ser maior que zero")
-        if limit > 100:
-            limit = 100
+
 
         email_repository = EmailRepository(db)
         service = EmailService(email_repository)
