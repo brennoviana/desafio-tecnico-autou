@@ -6,6 +6,17 @@ from openai.types.chat import ChatCompletion
 
 from app.core.config import settings
 
+from nltk.corpus import stopwords
+from nltk.stem import RSLPStemmer
+from nltk.tokenize import word_tokenize
+import nltk
+
+from app.core.config import settings
+
+nltk.download('rslp')
+nltk.download('stopwords')
+nltk.download('punkt_tab')
+
 
 class OpenAIIntegration:
     """Serviço para operações de IA utilizando OpenAI."""
@@ -22,7 +33,7 @@ class OpenAIIntegration:
             email_text: Texto do email a ser classificado
             
         Returns:
-            Dicionário com classificação, resposta completa da IA e sugestão extraída
+            Dicionário com classificação e sugestão extraída
             
         Raises:
             ValueError: Se o texto do email estiver vazio
@@ -30,6 +41,8 @@ class OpenAIIntegration:
         """
 
         try:
+            processed_text = self._preprocess_text(email_text, advanced_preprocessing=True)
+
             prompt = f"""
             Classifique o seguinte email como PRODUTIVO ou IMPRODUTIVO, de acordo com as definições abaixo:
 
@@ -43,7 +56,7 @@ class OpenAIIntegration:
             Categoria: <Produtivo/Improdutivo>
             Sugestão de resposta: <texto ou "Nenhuma ação necessária">
 
-            Email: "{self._preprocess_text(email_text)}"
+            Email: "{processed_text}"
             """
 
             response: ChatCompletion = self.client.chat.completions.create(
@@ -98,13 +111,33 @@ class OpenAIIntegration:
             print("Erro ao processar resposta da IA")
             raise e
 
-    def _preprocess_text(self, text: str) -> str:
-        """Limpeza leve preservando contexto para IA."""
+    def _preprocess_text(self, text: str, advanced_preprocessing: bool = False) -> str:
+        """
+        Pré-processamento NLP conforme especificações do desafio.
+        
+        Técnicas aplicadas:
+        1. Tokenização - Divisão em palavras individuais
+        2. Normalização - Conversão para lowercase
+        3. Remoção de stopwords - Remove palavras sem valor semântico
+        4. Stemming - Reduz palavras ao radical para generalização
+        5. Filtragem - Remove tokens não alfabéticos e muito curtos
+        """
         if not text or not text.strip():
             return ""
         
-        text = re.sub(r'http[s]?://\S+', '[URL]', text) 
+        text = re.sub(r'http[s]?://\S+', '[URL]', text)
         text = re.sub(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', '[EMAIL]', text)
-        text = re.sub(r'\s+', ' ', text) 
+        text = re.sub(r'\s+', ' ', text)
+    
+        if advanced_preprocessing:
+            stemmer = RSLPStemmer()
+            stop_words = set(stopwords.words("portuguese"))
+            
+            tokens = word_tokenize(text.lower())
+            tokens = [
+                stemmer.stem(w) for w in tokens 
+                if w.isalpha() and w not in stop_words and len(w) > 2
+            ]
+            return " ".join(tokens)
         
         return text.strip()
