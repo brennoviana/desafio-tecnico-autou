@@ -13,8 +13,6 @@ class Settings(BaseSettings):
 
     database_url: str = Field(validation_alias="DATABASE_URL")
 
-    log_level: str = Field(validation_alias="LOG_LEVEL")
-    
     openai_api_key: str = Field(validation_alias="OPENAI_API_KEY")
 
     model_config = SettingsConfigDict(

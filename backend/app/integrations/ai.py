@@ -14,7 +14,7 @@ class OpenAIIntegration:
         """Inicializa o serviço de IA com a configuração da API."""
         self.client = OpenAI(api_key=settings.openai_api_key)
 
-    async def classify_email(self, email_text: str) -> Dict[str, Any]:
+    def classify_email(self, email_text: str) -> Dict[str, Any]:
         """
         Classifica um email como PRODUTIVO ou IMPRODUTIVO e sugere uma resposta.
         
@@ -43,7 +43,7 @@ class OpenAIIntegration:
             Categoria: <Produtivo/Improdutivo>
             Sugestão de resposta: <texto ou "Nenhuma ação necessária">
 
-            Email: "{email_text}"
+            Email: "{self._preprocess_text(email_text)}"
             """
 
             response: ChatCompletion = self.client.chat.completions.create(
@@ -97,3 +97,14 @@ class OpenAIIntegration:
         except Exception as e:
             print("Erro ao processar resposta da IA")
             raise e
+
+    def _preprocess_text(self, text: str) -> str:
+        """Limpeza leve preservando contexto para IA."""
+        if not text or not text.strip():
+            return ""
+        
+        text = re.sub(r'http[s]?://\S+', '[URL]', text) 
+        text = re.sub(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', '[EMAIL]', text)
+        text = re.sub(r'\s+', ' ', text) 
+        
+        return text.strip()
