@@ -1,6 +1,6 @@
 """Schemas para validação de dados de email."""
 from datetime import datetime
-from typing import Optional, Literal
+from typing import Optional, Literal, List
 from pydantic import BaseModel, Field
 
 
@@ -42,3 +42,15 @@ class EmailSubmissionList(BaseModel):
 
     submissions: list[EmailSubmissionResponse]
     total: int
+
+class DeleteEmailsRequest(BaseModel):
+    """Schema para requisição de exclusão de emails por IDs."""
+    
+    ids: List[int] = Field(..., min_length=1, max_length=100, description="Lista de IDs dos emails para deletar")
+
+class DeleteEmailsResponse(BaseModel):
+    """Schema para resposta de exclusão de emails."""
+    
+    deleted_count: int = Field(..., description="Quantidade de emails deletados")
+    deleted_ids: List[int] = Field(..., description="Lista de IDs que foram deletados")
+    not_found_ids: Optional[List[int]] = Field(default=None, description="Lista de IDs que não foram encontrados")

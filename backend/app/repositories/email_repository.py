@@ -1,5 +1,5 @@
 """Repositório para operações de banco de dados relacionadas a emails."""
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Tuple
 from sqlalchemy.orm import Session
 
 from app.models.email import EmailSubmission
@@ -48,3 +48,38 @@ class EmailRepository:
             query = query.filter(EmailSubmission.email_title.ilike(f"%{email_title}%"))
         
         return query.count()
+    
+    def delete_by_ids(self, ids: List[int]) -> Tuple[List[int], List[int]]:
+        """
+        Deleta emails por uma lista de IDs.
+        
+        Returns:
+            Tuple contendo:
+            - Lista de IDs que foram deletados com sucesso
+            - Lista de IDs que não foram encontrados
+        """
+        # Primeiro, verifica quais IDs existem
+        existing_emails = self.db.query(EmailSubmission).filter(EmailSubmission.id.in_(ids)).all()
+        existing_ids = [email.id for email in existing_emails]
+        not_found_ids = [id for id in ids if id not in existing_ids]
+        
+        # Deleta os emails encontrados
+        if existing_ids:
+            deleted_count = self.db.query(EmailSubmission).filter(EmailSubmission.id.in_(existing_ids)).delete(synchronize_session=False)
+            self.db.commit()
+        
+        return existing_ids, not_found_ids
+    
+    def delete_by_id(self, email_id: int) -> bool:
+        """
+        Deleta um email pelo ID.
+        
+        Returns:
+            True se deletado com sucesso, False se não encontrado
+        """
+        email = self.get_by_id(email_id)
+        if email:
+            self.db.delete(email)
+            self.db.commit()
+            return True
+        return False

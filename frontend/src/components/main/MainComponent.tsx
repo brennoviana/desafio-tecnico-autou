@@ -1,13 +1,11 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Button, Flex, Table, Input } from 'antd';
+import { Button, Flex, Table, Input, message } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
-import type { TableColumnsType, TableProps } from 'antd';
+import type { TableColumnsType } from 'antd';
 import ModalComponent from '../modal/ModalComponent';
 import { EmailApi } from '../../api/email-api';
 
 const { Search } = Input;
-
-type TableRowSelection<T extends object = object> = TableProps<T>['rowSelection'];
 
 interface EmailType {
   id: number;
@@ -86,7 +84,7 @@ const MainComponent: React.FC = () => {
         total: data.total
       }));
     } catch (error) {
-      console.error('Erro ao buscar dados:', error);
+      message.error('Erro ao carregar emails');
     } finally {
       setLoading(false);
     }
@@ -146,22 +144,37 @@ const MainComponent: React.FC = () => {
     };
   }, [searchTimeout]);
 
-  const start = () => {
+  const deleteEmails = async () => {
+    if (selectedRowKeys.length === 0) return;
+    
     setLoading(true);
-    setTimeout(() => {
+    try {
+      const selectedIds = selectedRowKeys.map(key => Number(key));
+      
+      
+      const result = await emailApi.deleteEmails(selectedIds);
+      
+      
+      if (result.deleted_count > 0) {
+        message.success(`${result.deleted_count} email(s) deletado(s) com sucesso`);
+        
+        if (result.not_found_ids && result.not_found_ids.length > 0) {
+          message.warning(`${result.not_found_ids.length} email(s) não encontrado(s)`);
+        }
+      }
+      
       setSelectedRowKeys([]);
+      await fetchData(pagination.current, pagination.pageSize, searchText);
+      
+    } catch (error) {
+      message.error('Erro ao deletar emails');
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
   const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
-    console.log('selectedRowKeys changed: ', newSelectedRowKeys);
     setSelectedRowKeys(newSelectedRowKeys);
-  };
-
-  const rowSelection: TableRowSelection<EmailType> = {
-    selectedRowKeys,
-    onChange: onSelectChange,
   };
 
   const hasSelected = selectedRowKeys.length > 0;
@@ -171,13 +184,18 @@ const MainComponent: React.FC = () => {
       <Flex align="center" gap="middle" justify="space-between">
         <Flex align="center" gap="middle">
           {hasSelected ? (
-            <Button type="primary" onClick={start} disabled={!hasSelected} loading={loading}>
-              Delete
+            <Button 
+              type="primary" 
+              danger
+              onClick={deleteEmails} 
+              disabled={!hasSelected} 
+              loading={loading}
+            >
+              Deletar ({selectedRowKeys.length})
             </Button>
             ) : (
               <ModalComponent />
           )}
-          {hasSelected ? `Selected ${selectedRowKeys.length} items` : null}
         </Flex>
         
         <Search
@@ -194,7 +212,10 @@ const MainComponent: React.FC = () => {
       
       <Table<EmailType>  
         bordered 
-        rowSelection={rowSelection} 
+        rowSelection={{
+          selectedRowKeys,
+          onChange: onSelectChange,
+        }} 
         columns={columns} 
         dataSource={dataSource}
         loading={loading}

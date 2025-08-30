@@ -1,7 +1,7 @@
 """Serviços de lógica de negócio para emails."""
-from typing import Optional
+from typing import Optional, List
 from fastapi import UploadFile
-from app.schemas.email import EmailSubmissionCreate, EmailSubmissionResponse, EmailSubmissionList
+from app.schemas.email import EmailSubmissionCreate, EmailSubmissionResponse, EmailSubmissionList, DeleteEmailsResponse
 from app.integrations.ai import OpenAIIntegration
 from app.repositories.email_repository import EmailRepository
 from app.utils.file_processor import FileProcessor
@@ -101,4 +101,31 @@ class EmailService:
             )
         except Exception as e:
             print("Erro ao listar submissões")
+            raise e
+
+    async def delete_emails(self, ids: List[int]) -> DeleteEmailsResponse:
+        """Deleta emails por uma lista de IDs."""
+        try:
+            if not ids:
+                raise ValueError("Lista de IDs não pode estar vazia")
+            
+            if len(ids) > 100:
+                raise ValueError("Não é possível deletar mais de 100 emails por vez")
+            
+            for email_id in ids:
+                if not isinstance(email_id, int) or email_id <= 0:
+                    raise ValueError(f"ID inválido: {email_id}")
+            
+            deleted_ids, not_found_ids = self.email_repository.delete_by_ids(ids)
+            
+            return DeleteEmailsResponse(
+                deleted_count=len(deleted_ids),
+                deleted_ids=deleted_ids,
+                not_found_ids=not_found_ids if not_found_ids else None
+            )
+            
+        except ValueError as e:
+            raise e
+        except Exception as e:
+            print(f"Erro ao deletar emails: {str(e)}")
             raise e

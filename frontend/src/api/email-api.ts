@@ -18,6 +18,22 @@ export class EmailApi  {
     const response = await fetch(`${this.baseUrl}/emails?${params}`);
     return response.json();
   }
+
+  async deleteEmails(ids: number[]): Promise<DeleteEmailsResponse> {
+    const response = await fetch(`${this.baseUrl}/emails`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ ids })
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return response.json();
+  }
 }
 
 export interface EmailResponse {
@@ -31,4 +47,10 @@ export interface EmailResponse {
   created_at: string;
   }[];
   total: number;
+}
+
+export interface DeleteEmailsResponse {
+  deleted_count: number;
+  deleted_ids: number[];
+  not_found_ids?: number[];
 }

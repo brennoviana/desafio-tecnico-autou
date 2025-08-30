@@ -4,7 +4,14 @@ from sqlalchemy.orm import Session
 from typing import Optional
 
 from app.core.database import get_db_session
-from app.schemas.email import EmailSubmissionResponse, EmailSubmissionList, TextEmailRequest, FileEmailRequest
+from app.schemas.email import (
+    EmailSubmissionResponse, 
+    EmailSubmissionList, 
+    TextEmailRequest, 
+    FileEmailRequest,
+    DeleteEmailsRequest,
+    DeleteEmailsResponse
+)
 from app.services.email_service import EmailService
 from app.integrations.ai import OpenAIIntegration
 from app.repositories.email_repository import EmailRepository
@@ -111,6 +118,46 @@ async def list_submissions(
         ) from e
     except Exception as e:
         print(f"Erro ao buscar submissões: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Erro interno do servidor"
+        ) from e
+
+
+@router.delete("/", response_model=DeleteEmailsResponse, status_code=status.HTTP_200_OK)
+async def delete_emails(
+    request: DeleteEmailsRequest,
+    db: Session = Depends(get_db_session)
+):
+    """
+    Deleta múltiplos emails por IDs.
+    
+    Recebe JSON com:
+    - ids: array de IDs dos emails para deletar (máx. 100)
+    
+    Retorna:
+    - deleted_count: quantidade de emails deletados
+    - deleted_ids: lista de IDs que foram deletados
+    - not_found_ids: lista de IDs que não foram encontrados (opcional)
+    """
+    try:
+        if not request.ids:
+            raise ValueError("Lista de IDs não pode estar vazia")
+        
+        if len(request.ids) > 100:
+            raise ValueError("Não é possível deletar mais de 100 emails por vez")
+
+        email_repository = EmailRepository(db)
+        service = EmailService(email_repository)
+        result = await service.delete_emails(request.ids)
+        return result
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Dados inválidos: {str(e)}"
+        ) from e
+    except Exception as e:
+        print(f"Erro ao deletar emails: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Erro interno do servidor"
