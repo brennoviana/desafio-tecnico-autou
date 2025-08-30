@@ -2,36 +2,39 @@ import React, { useEffect, useState } from 'react';
 import { Button, Flex, Table } from 'antd';
 import type { TableColumnsType, TableProps } from 'antd';
 import ModalComponent from '../modal/ModalComponent';
+import { EmailApi } from '../../api/email-api';
+import type { EmailResponse } from '../../api/email-api';
 
 type TableRowSelection<T extends object = object> = TableProps<T>['rowSelection'];
 
-interface DataType {
-  key: React.Key;
-  name: string;
-  age: number;
-  address: string;
+interface EmailType {
+  id: string;
+  email_title: string;
+  message: string;
+  type: string;
+  ai_classification: string;
+  ai_suggested_reply: string;
+  createdAt: string;
 }
 
-const columns: TableColumnsType<DataType> = [
-  { title: 'Name', dataIndex: 'name' },
-  { title: 'Age', dataIndex: 'age' },
-  { title: 'Address', dataIndex: 'address' },
+const columns: TableColumnsType<EmailType> = [
+  { title: 'Título', dataIndex: 'email_title' },
+  { title: 'Mensagem', dataIndex: 'message' },
+  { title: 'Tipo', dataIndex: 'type' },
+  { title: 'Classificação', dataIndex: 'ai_classification' },
+  { title: 'Resposta Sugerida', dataIndex: 'ai_suggested_reply' },
+  { title: 'Criado Em', dataIndex: 'createdAt' },
 ];
 
 const MainComponent: React.FC = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [loading, setLoading] = useState(false);
-  const [dataSource, setDataSource] = useState<DataType[]>([]);
+  const [dataSource, setDataSource] = useState<EmailType[]>([]);
 
-  const fetchData = () => {
-    setTimeout(() => {
-      setDataSource(Array.from<DataType>({ length: 46 }).map<DataType>((_, i) => ({
-        key: i,
-        name: `Edward King ${i}`,
-        age: 32,
-        address: `London, Park Lane no. ${i}`,
-      })));
-    }, 1000);
+  const fetchData = async () => {
+    const emailApi = new EmailApi();
+    const data = await emailApi.getEmails(0, 10);
+    setDataSource(data.submissions);
   };
 
   useEffect(() => {
@@ -41,7 +44,6 @@ const MainComponent: React.FC = () => {
 
   const start = () => {
     setLoading(true);
-    // ajax request after empty completing
     setTimeout(() => {
       setSelectedRowKeys([]);
       setLoading(false);
@@ -53,7 +55,7 @@ const MainComponent: React.FC = () => {
     setSelectedRowKeys(newSelectedRowKeys);
   };
 
-  const rowSelection: TableRowSelection<DataType> = {
+  const rowSelection: TableRowSelection<EmailType> = {
     selectedRowKeys,
     onChange: onSelectChange,
   };
@@ -72,7 +74,7 @@ const MainComponent: React.FC = () => {
         )}
         {hasSelected ? `Selected ${selectedRowKeys.length} items` : null}
       </Flex>
-      <Table<DataType> rowSelection={rowSelection} columns={columns} dataSource={dataSource} />
+      <Table<EmailType> rowSelection={rowSelection} columns={columns} dataSource={dataSource} />
     </Flex>
   );
 };
