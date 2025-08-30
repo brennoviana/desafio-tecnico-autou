@@ -16,12 +16,6 @@ class FileEmailRequest(BaseModel):
     
     email_title: str = Field(..., min_length=2, max_length=255, description="Título do email")
 
-class ListEmailRequest(BaseModel):
-    """Schema para lista de submissões de email."""
-    
-    skip: int = Field(..., description="Número de submissões a pular")
-    limit: int = Field(..., description="Número máximo de submissões a retornar")   
-
 class EmailSubmissionCreate(BaseModel):
     """Schema para criação de uma nova submissão de email."""
 

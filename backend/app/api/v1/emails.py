@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db_session
-from app.schemas.email import EmailSubmissionResponse, EmailSubmissionList, TextEmailRequest, FileEmailRequest, ListEmailRequest
+from app.schemas.email import EmailSubmissionResponse, EmailSubmissionList, TextEmailRequest, FileEmailRequest
 from app.services.email_service import EmailService
 from app.integrations.ai import OpenAIIntegration
 from app.repositories.email_repository import EmailRepository
@@ -87,20 +87,16 @@ async def submit_file_email(
 
 @router.get("/", response_model=EmailSubmissionList, status_code=status.HTTP_200_OK)
 async def list_submissions(
-    request: ListEmailRequest,
+    skip: int,
+    limit: int,
     db: Session = Depends(get_db_session)
 ):
     """Lista submissões com paginação (máx. 100)."""
     try:
-        skip = request.skip
-        limit = request.limit
-
-        
         if skip < 0:
             raise ValueError("Parâmetro 'skip' deve ser maior ou igual a zero")
         if limit <= 0 or limit > 100:
-            raise ValueError("Parâmetro 'limit' deve ser maior que zero")
-
+            raise ValueError("Parâmetro 'limit' deve ser maior que zero e menor ou igual a 100")
 
         email_repository = EmailRepository(db)
         service = EmailService(email_repository)
