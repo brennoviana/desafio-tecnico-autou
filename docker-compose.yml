@@ -7,7 +7,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - "${POSTGRES_PORT}:5432"
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
@@ -32,10 +32,22 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - API_V1_STR=${API_V1_STR}
     ports:
-      - "${API_PORT}:8000"
+      - "8000:8000"
     depends_on:
       postgres:
         condition: service_healthy  
+    networks:
+      - email-network
+
+  email-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: email-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - email-api
     networks:
       - email-network
 
