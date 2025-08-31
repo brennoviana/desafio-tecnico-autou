@@ -42,10 +42,7 @@
   background-color: #ffffff;
 }
 
-.table-row-light:hover,
-.table-row-dark:hover {
-  background-color: #e6f7ff !important;
-}
+
 
 /* Cabeçalho da tabela */
 .ant-table-thead > tr > th {
@@ -109,9 +106,6 @@
 }
 
 /* Melhorias visuais adicionais */
-.ant-table-tbody > tr:hover > td {
-  background-color: #e6f7ff !important;
-}
 
 .ant-table-cell {
   border-color: #f0f0f0 !important;
@@ -124,7 +118,4 @@
   transition: all 0.3s ease;
 }
 
-.ant-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
+

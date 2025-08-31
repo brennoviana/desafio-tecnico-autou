@@ -5,7 +5,7 @@ export class EmailApi  {
   }
 
   async getEmails(skip: number, limit: number) : Promise<EmailResponse> {
-    const response = await fetch(`${this.baseUrl}/emails?skip=${skip}&limit=${limit}`);
+    const response = await fetch(`${this.baseUrl}/emails/?skip=${skip}&limit=${limit}`);
     return response.json();
   }
 
