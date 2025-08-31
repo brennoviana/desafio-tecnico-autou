@@ -463,7 +463,10 @@ const MainComponent: React.FC = () => {
                 </Text>
               </div>
             </div>
-          )
+          ),
+          triggerDesc: 'Clique para ordenar decrescente',
+          triggerAsc: 'Clique para ordenar crescente',
+          cancelSort: 'Clique para cancelar ordenação'
         }}
       />
         </Flex>
