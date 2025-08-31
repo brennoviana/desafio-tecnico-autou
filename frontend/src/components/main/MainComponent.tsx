@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Button, Flex, Table, Input, message } from 'antd';
-import { SearchOutlined } from '@ant-design/icons';
+import { DeleteOutlined, SearchOutlined } from '@ant-design/icons';
 import type { TableColumnsType } from 'antd';
 import ModalComponent from '../modal/ModalComponent';
 import { EmailApi } from '../../api/email-api';
@@ -192,6 +192,7 @@ const MainComponent: React.FC = () => {
               onClick={deleteEmails} 
               disabled={!hasSelected} 
               loading={loading}
+              icon={<DeleteOutlined />}
             >
               Deletar ({selectedRowKeys.length})
             </Button>

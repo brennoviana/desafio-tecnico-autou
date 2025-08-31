@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, Modal, Form, Input, message, Upload } from 'antd';
+import { Button, Modal, Form, Input, message, Upload, Space } from 'antd';
 import { PlusOutlined, InboxOutlined } from '@ant-design/icons';
 import type { UploadProps } from 'antd';
 import { EmailApi } from '../../api/email-api';
@@ -133,7 +133,7 @@ const ModalComponent: React.FC<ModalComponentProps> = ({ onEmailAdded }) => {
             label="Tipo de Submissão"
             style={{ marginBottom: 16 }}
           >
-            <Button.Group>
+            <Space.Compact>
               <Button 
                 type={submitType === 'text' ? 'primary' : 'default'}
                 onClick={() => setSubmitType('text')}
@@ -146,7 +146,7 @@ const ModalComponent: React.FC<ModalComponentProps> = ({ onEmailAdded }) => {
               >
                 Upload Arquivo
               </Button>
-            </Button.Group>
+            </Space.Compact>
           </Form.Item>
 
           <Form.Item
