@@ -1,7 +1,7 @@
 """Serviços de lógica de negócio para emails."""
 from typing import Optional, List
 from fastapi import UploadFile
-from app.schemas.email import EmailSubmissionCreate, EmailSubmissionResponse, EmailSubmissionList, DeleteEmailsResponse
+from app.schemas.email import EmailSubmissionCreate, EmailSubmissionResponse, EmailSubmissionList, DeleteEmailsResponse, EmailStatsResponse
 from app.integrations.ai import OpenAIIntegration
 from app.repositories.email_repository import EmailRepository
 from app.utils.file_processor import FileProcessor
@@ -128,4 +128,13 @@ class EmailService:
             raise e
         except Exception as e:
             print(f"Erro ao deletar emails: {str(e)}")
+            raise e
+
+    async def get_statistics(self) -> EmailStatsResponse:
+        """Retorna estatísticas dos emails."""
+        try:
+            stats = self.email_repository.get_statistics()
+            return EmailStatsResponse(**stats)
+        except Exception as e:
+            print(f"Erro ao buscar estatísticas: {str(e)}")
             raise e

@@ -68,6 +68,16 @@ export class EmailApi  {
 
     return response.json();
   }
+
+  async getEmailStats(): Promise<EmailStatsResponse> {
+    const response = await fetch(`${this.baseUrl}/emails/stats`);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return response.json();
+  }
 }
 
 export interface EmailResponse {
@@ -97,4 +107,14 @@ export interface DeleteEmailsResponse {
   deleted_count: number;
   deleted_ids: number[];
   not_found_ids?: number[];
+}
+
+export interface EmailStatsResponse {
+  total: number;
+  produtivos: number;
+  improdutivos: number;
+  nao_classificados: number;
+  pdf: number;
+  txt: number;
+  texto_puro: number;
 }

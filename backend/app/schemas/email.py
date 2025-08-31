@@ -54,3 +54,14 @@ class DeleteEmailsResponse(BaseModel):
     deleted_count: int = Field(..., description="Quantidade de emails deletados")
     deleted_ids: List[int] = Field(..., description="Lista de IDs que foram deletados")
     not_found_ids: Optional[List[int]] = Field(default=None, description="Lista de IDs que não foram encontrados")
+
+class EmailStatsResponse(BaseModel):
+    """Schema para estatísticas de emails."""
+    
+    total: int = Field(..., description="Total de emails")
+    produtivos: int = Field(..., description="Emails classificados como produtivos")
+    improdutivos: int = Field(..., description="Emails classificados como improdutivos")
+    nao_classificados: int = Field(..., description="Emails não classificados pela IA")
+    pdf: int = Field(..., description="Emails do tipo PDF")
+    txt: int = Field(..., description="Emails do tipo TXT")
+    texto_puro: int = Field(..., description="Emails do tipo texto puro")

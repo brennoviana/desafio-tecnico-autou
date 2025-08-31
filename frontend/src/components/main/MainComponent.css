@@ -1,0 +1,130 @@
+/* Estilos para o MainComponent */
+
+/* Container principal */
+.main-container {
+  padding: 24px;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+/* Cards */
+.main-header-card {
+  margin-bottom: 24px;
+}
+
+.main-stats-row {
+  margin-bottom: 24px;
+}
+
+.main-title {
+  margin: 0;
+  text-align: center;
+  color: #1890ff;
+}
+
+.main-subtitle {
+  display: block;
+  text-align: center;
+  margin-top: 8px;
+}
+
+/* Tabela */
+.main-table-card .ant-card {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border-radius: 8px;
+}
+
+.table-row-light {
+  background-color: #fafafa;
+}
+
+.table-row-dark {
+  background-color: #ffffff;
+}
+
+.table-row-light:hover,
+.table-row-dark:hover {
+  background-color: #e6f7ff !important;
+}
+
+/* Cabeçalho da tabela */
+.ant-table-thead > tr > th {
+  background-color: #001529 !important;
+  color: #ffffff !important;
+  font-weight: 600;
+}
+
+.ant-table-thead > tr > th::before {
+  background-color: #ffffff !important;
+}
+
+/* Cards de estatísticas */
+.ant-card {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border-radius: 8px;
+}
+
+.ant-statistic-title {
+  font-weight: 500;
+}
+
+/* Tags */
+.ant-tag {
+  border-radius: 6px;
+  font-weight: 500;
+  padding: 4px 8px;
+}
+
+/* Estado vazio da tabela */
+.empty-state {
+  padding: 50px;
+  text-align: center;
+}
+
+.empty-state-icon {
+  font-size: 48px;
+  color: #d9d9d9;
+  margin-bottom: 16px;
+}
+
+.empty-state-title {
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.empty-state-subtitle {
+  margin-top: 8px;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .main-container {
+    padding: 16px;
+  }
+  
+  .main-header-card,
+  .main-stats-row {
+    margin-bottom: 16px;
+  }
+}
+
+/* Melhorias visuais adicionais */
+.ant-table-tbody > tr:hover > td {
+  background-color: #e6f7ff !important;
+}
+
+.ant-table-cell {
+  border-color: #f0f0f0 !important;
+}
+
+/* Animações suaves */
+.ant-card,
+.ant-tag,
+.ant-btn {
+  transition: all 0.3s ease;
+}
+
+.ant-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}

@@ -83,3 +83,68 @@ class EmailRepository:
             self.db.commit()
             return True
         return False
+    
+    def get_statistics(self) -> Dict[str, int]:
+        """
+        Retorna estatísticas dos emails.
+        
+        Returns:
+            Dicionário com as estatísticas dos emails
+        """
+        from sqlalchemy import func, case
+        
+        # Query para contar total e estatísticas por classificação
+        classification_stats = self.db.query(
+            func.count(EmailSubmission.id).label('total'),
+            func.sum(
+                case(
+                    (EmailSubmission.ai_classification.ilike('%produtivo%'), 1),
+                    else_=0
+                )
+            ).label('produtivos'),
+            func.sum(
+                case(
+                    (EmailSubmission.ai_classification.ilike('%improdutivo%'), 1),
+                    else_=0
+                )
+            ).label('improdutivos'),
+            func.sum(
+                case(
+                    (EmailSubmission.ai_classification.is_(None), 1),
+                    (EmailSubmission.ai_classification == '', 1),
+                    else_=0
+                )
+            ).label('nao_classificados')
+        ).first()
+        
+        # Query para contar por tipo
+        type_stats = self.db.query(
+            func.sum(
+                case(
+                    (EmailSubmission.type.ilike('%pdf%'), 1),
+                    else_=0
+                )
+            ).label('pdf'),
+            func.sum(
+                case(
+                    (EmailSubmission.type.ilike('%txt%'), 1),
+                    else_=0
+                )
+            ).label('txt'),
+            func.sum(
+                case(
+                    (EmailSubmission.type.ilike('%texto puro%'), 1),
+                    else_=0
+                )
+            ).label('texto_puro')
+        ).first()
+        
+        return {
+            'total': classification_stats.total or 0,
+            'produtivos': classification_stats.produtivos or 0,
+            'improdutivos': classification_stats.improdutivos or 0,
+            'nao_classificados': classification_stats.nao_classificados or 0,
+            'pdf': type_stats.pdf or 0,
+            'txt': type_stats.txt or 0,
+            'texto_puro': type_stats.texto_puro or 0
+        }

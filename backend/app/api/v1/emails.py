@@ -9,7 +9,8 @@ from app.schemas.email import (
     EmailSubmissionList, 
     TextEmailRequest, 
     DeleteEmailsRequest,
-    DeleteEmailsResponse
+    DeleteEmailsResponse,
+    EmailStatsResponse
 )
 from app.services.email_service import EmailService
 from app.integrations.ai import OpenAIIntegration
@@ -157,6 +158,35 @@ async def delete_emails(
         ) from e
     except Exception as e:
         print(f"Erro ao deletar emails: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Erro interno do servidor"
+        ) from e
+
+
+@router.get("/stats", response_model=EmailStatsResponse, status_code=status.HTTP_200_OK)
+async def get_email_statistics(
+    db: Session = Depends(get_db_session)
+):
+    """
+    Retorna estatísticas dos emails.
+    
+    Retorna:
+    - total: total de emails
+    - produtivos: emails classificados como produtivos
+    - improdutivos: emails classificados como improdutivos  
+    - nao_classificados: emails não classificados pela IA
+    - pdf: emails do tipo PDF
+    - txt: emails do tipo TXT
+    - texto_puro: emails do tipo texto puro
+    """
+    try:
+        email_repository = EmailRepository(db)
+        service = EmailService(email_repository)
+        result = await service.get_statistics()
+        return result
+    except Exception as e:
+        print(f"Erro ao buscar estatísticas: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Erro interno do servidor"

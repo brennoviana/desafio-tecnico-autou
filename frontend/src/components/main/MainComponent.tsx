@@ -1,11 +1,14 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Button, Flex, Table, Input, message } from 'antd';
-import { DeleteOutlined, SearchOutlined } from '@ant-design/icons';
+import { Button, Flex, Table, Input, message, Card, Tag, Typography, Tooltip, Space, Statistic, Row, Col } from 'antd';
+import { DeleteOutlined, SearchOutlined, MailOutlined, RobotOutlined, FileTextOutlined, FilePdfOutlined, ClockCircleOutlined, CheckCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import type { TableColumnsType } from 'antd';
 import ModalComponent from '../modal/ModalComponent';
 import { EmailApi } from '../../api/email-api';
+import type { EmailStatsResponse } from '../../api/email-api';
+import './MainComponent.css';
 
 const { Search } = Input;
+const { Title, Text } = Typography;
 
 interface EmailType {
   id: number;
@@ -18,26 +21,136 @@ interface EmailType {
   key?: number;
 }
 
+const getTypeIcon = (type: string) => {
+  switch (type.toLowerCase()) {
+    case 'pdf':
+      return <FilePdfOutlined />;
+    case 'txt':
+      return <FileTextOutlined />;
+    default:
+      return <MailOutlined />;
+  }
+};
+
+const getTypeColor = (type: string) => {
+  switch (type.toLowerCase()) {
+    case 'pdf':
+      return 'red';
+    case 'txt':
+      return 'blue';
+    default:
+      return 'green';
+  }
+};
+
+const getClassificationColor = (classification: string) => {
+  if (classification?.toLowerCase().includes('produtivo')) {
+    return 'success';
+  } else if (classification?.toLowerCase().includes('improdutivo')) {
+    return 'warning';
+  }
+  return 'default';
+};
+
+const getClassificationIcon = (classification: string) => {
+  if (classification?.toLowerCase().includes('produtivo')) {
+    return <CheckCircleOutlined />;
+  } else if (classification?.toLowerCase().includes('improdutivo')) {
+    return <ExclamationCircleOutlined />;
+  }
+  return <RobotOutlined />;
+};
+
+const truncateText = (text: string, maxLength: number = 50) => {
+  if (!text) return '-';
+  if (text.length <= maxLength) return text;
+  return text.substring(0, maxLength) + '...';
+};
+
 const columns: TableColumnsType<EmailType> = [
-  { title: 'Título', dataIndex: 'email_title', sorter: (a, b) => a.email_title.localeCompare(b.email_title) },
-  { title: 'Mensagem', dataIndex: 'message', sorter: (a, b) => a.message.localeCompare(b.message) },
-  { title: 'Tipo', dataIndex: 'type', sorter: (a, b) => a.type.localeCompare(b.type) },
-  { title: 'Classificação', dataIndex: 'ai_classification', sorter: (a, b) => a.ai_classification.localeCompare(b.ai_classification) },
-  { title: 'Resposta Sugerida', dataIndex: 'ai_suggested_reply', sorter: (a, b) => a.ai_suggested_reply.localeCompare(b.ai_suggested_reply) },
   { 
-    title: 'Criado Em', 
+    title: <Space><MailOutlined />Título</Space>, 
+    dataIndex: 'email_title', 
+    sorter: (a, b) => a.email_title.localeCompare(b.email_title),
+    render: (text: string) => (
+      <Tooltip title={text}>
+        <Text strong style={{ color: '#1890ff' }}>
+          {truncateText(text, 30)}
+        </Text>
+      </Tooltip>
+    ),
+    width: 200
+  },
+  { 
+    title: <Space><FileTextOutlined />Mensagem</Space>, 
+    dataIndex: 'message', 
+    sorter: (a, b) => a.message.localeCompare(b.message),
+    render: (text: string) => (
+      <Tooltip title={text}>
+        <Text>{truncateText(text, 40)}</Text>
+      </Tooltip>
+    ),
+    width: 250
+  },
+  { 
+    title: <Space><FileTextOutlined />Tipo</Space>, 
+    dataIndex: 'type', 
+    sorter: (a, b) => a.type.localeCompare(b.type),
+    render: (type: string) => (
+      <Tag icon={getTypeIcon(type)} color={getTypeColor(type)}>
+        {type}
+      </Tag>
+    ),
+    width: 120
+  },
+  { 
+    title: <Space><RobotOutlined />Classificação IA</Space>, 
+    dataIndex: 'ai_classification', 
+    sorter: (a, b) => a.ai_classification.localeCompare(b.ai_classification),
+    render: (classification: string) => (
+      <Tag 
+        icon={getClassificationIcon(classification)} 
+        color={getClassificationColor(classification)}
+      >
+        {classification || 'Não classificado'}
+      </Tag>
+    ),
+    width: 150
+  },
+  { 
+    title: <Space><RobotOutlined />Resposta Sugerida</Space>, 
+    dataIndex: 'ai_suggested_reply', 
+    sorter: (a, b) => a.ai_suggested_reply.localeCompare(b.ai_suggested_reply),
+    render: (reply: string) => (
+      <Tooltip title={reply}>
+        <Text type="secondary" italic>
+          {truncateText(reply, 50) || 'Nenhuma sugestão'}
+        </Text>
+      </Tooltip>
+    ),
+    width: 300
+  },
+  { 
+    title: <Space><ClockCircleOutlined />Data de Criação</Space>, 
     dataIndex: 'created_at',
     sorter: (a, b) => a.created_at.localeCompare(b.created_at),
     render: (text: string) => {
-      if (!text) return '-';
-      return new Date(text).toLocaleString('pt-BR', {
+      if (!text) return <Text type="secondary">-</Text>;
+      const date = new Date(text);
+      const formattedDate = date.toLocaleString('pt-BR', {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric',
         hour: '2-digit',
         minute: '2-digit'
       });
-    }
+      return (
+        <Tooltip title={`Criado em ${formattedDate}`}>
+          <Text type="secondary">{formattedDate}</Text>
+        </Tooltip>
+      );
+    },
+    width: 150
   },
 ];
 
@@ -49,6 +162,15 @@ const MainComponent: React.FC = () => {
   const [dataSource, setDataSource] = useState<EmailType[]>([]);
   const [searchText, setSearchText] = useState('');
   const [searchTimeout, setSearchTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
+  const [stats, setStats] = useState<EmailStatsResponse>({
+    total: 0,
+    produtivos: 0,
+    improdutivos: 0,
+    nao_classificados: 0,
+    pdf: 0,
+    txt: 0,
+    texto_puro: 0
+  });
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 5,
@@ -58,6 +180,15 @@ const MainComponent: React.FC = () => {
     showTotal: (total: number, range: number[]) => 
       `${range[0]}-${range[1]} de ${total} itens`,
   });
+
+  const fetchStats = async () => {
+    try {
+      const statsData = await emailApi.getEmailStats();
+      setStats(statsData);
+    } catch (error) {
+      console.error('Erro ao carregar estatísticas:', error);
+    }
+  };
 
   const fetchData = async (page: number = 1, pageSize: number = 5, searchTitle: string = '') => {
     setLoading(true);
@@ -92,6 +223,7 @@ const MainComponent: React.FC = () => {
 
   const handleEmailAdded = () => {
     fetchData(pagination.current, pagination.pageSize, searchText);
+    fetchStats();
   };
 
   const debouncedSearch = useCallback((value: string) => {
@@ -138,6 +270,7 @@ const MainComponent: React.FC = () => {
 
   useEffect(() => {
     fetchData();
+    fetchStats();
   }, []);
 
   useEffect(() => {
@@ -167,6 +300,7 @@ const MainComponent: React.FC = () => {
       
       setSelectedRowKeys([]);
       await fetchData(pagination.current, pagination.pageSize, searchText);
+      fetchStats();
       
     } catch (error) {
       message.error('Erro ao deletar emails');
@@ -182,8 +316,102 @@ const MainComponent: React.FC = () => {
   const hasSelected = selectedRowKeys.length > 0;
 
   return (
-    <Flex gap="middle" vertical>
-      <Flex align="center" gap="middle" justify="space-between">
+    <div className="main-container">
+      {/* Cabeçalho com título */}
+      <Card className="main-header-card">
+        <Title level={2} className="main-title">
+          <MailOutlined style={{ marginRight: '8px' }} />
+          Sistema de Processamento de Emails
+        </Title>
+        <Text type="secondary" className="main-subtitle">
+          Análise inteligente de emails com classificação por IA
+        </Text>
+      </Card>
+
+      {/* Cards de estatísticas */}
+      <Row gutter={[16, 16]} className="main-stats-row">
+        <Col xs={24} sm={12} md={8} lg={4}>
+          <Card>
+            <Statistic 
+              title="Total de Emails" 
+              value={stats.total} 
+              prefix={<MailOutlined style={{ color: '#1890ff' }} />}
+            />
+          </Card>
+        </Col>
+        <Col xs={24} sm={12} md={8} lg={4}>
+          <Card>
+            <Statistic 
+              title="Produtivos" 
+              value={stats.produtivos} 
+              prefix={<CheckCircleOutlined style={{ color: '#52c41a' }} />}
+              valueStyle={{ color: '#52c41a' }}
+            />
+          </Card>
+        </Col>
+        <Col xs={24} sm={12} md={8} lg={4}>
+          <Card>
+            <Statistic 
+              title="Improdutivos" 
+              value={stats.improdutivos} 
+              prefix={<ExclamationCircleOutlined style={{ color: '#faad14' }} />}
+              valueStyle={{ color: '#faad14' }}
+            />
+          </Card>
+        </Col>
+        <Col xs={24} sm={12} md={8} lg={4}>
+          <Card>
+            <Statistic 
+              title="PDFs" 
+              value={stats.pdf} 
+              prefix={<FilePdfOutlined style={{ color: '#f5222d' }} />}
+              valueStyle={{ color: '#f5222d' }}
+            />
+          </Card>
+        </Col>
+        <Col xs={24} sm={12} md={8} lg={4}>
+          <Card>
+            <Statistic 
+              title="TXTs" 
+              value={stats.txt} 
+              prefix={<FileTextOutlined style={{ color: '#1890ff' }} />}
+              valueStyle={{ color: '#1890ff' }}
+            />
+          </Card>
+        </Col>
+        <Col xs={24} sm={12} md={8} lg={4}>
+          <Card>
+            <Statistic 
+              title="Texto Puro" 
+              value={stats.texto_puro} 
+              prefix={<FileTextOutlined style={{ color: '#52c41a' }} />}
+              valueStyle={{ color: '#52c41a' }}
+            />
+          </Card>
+        </Col>
+      </Row>
+
+      {/* Card principal com a tabela */}
+      <Card 
+        className="main-table-card"
+        title={
+          <Space>
+            <MailOutlined />
+            <span>Lista de Emails ({pagination.total} total)</span>
+          </Space>
+        }
+        extra={
+          <Space>
+            {hasSelected && (
+              <Text type="secondary">
+                {selectedRowKeys.length} item(s) selecionado(s)
+              </Text>
+            )}
+          </Space>
+        }
+      >
+        <Flex gap="middle" vertical>
+          <Flex align="center" gap="middle" justify="space-between">
         <Flex align="center" gap="middle">
           {hasSelected ? (
             <Button 
@@ -215,6 +443,7 @@ const MainComponent: React.FC = () => {
       
       <Table<EmailType>  
         bordered 
+        size="middle"
         rowSelection={{
           selectedRowKeys,
           onChange: onSelectChange,
@@ -222,17 +451,43 @@ const MainComponent: React.FC = () => {
         columns={columns} 
         dataSource={dataSource}
         loading={loading}
+        scroll={{ x: 1200 }}
+        rowClassName={(_, index) => 
+          index % 2 === 0 ? 'table-row-light' : 'table-row-dark'
+        }
         pagination={{
           ...pagination,
           onChange: handleTableChange,
           onShowSizeChange: handleTableChange,
+          showQuickJumper: true,
           locale: {
             items_per_page: '/ página',
-            page: 'página'
+            page: 'página',
+            jump_to: 'Ir para',
+            jump_to_confirm: 'confirmar'
           }
         }}
+        locale={{
+          emptyText: (
+            <div className="empty-state">
+              <MailOutlined className="empty-state-icon" />
+              <div>
+                <Text type="secondary" className="empty-state-title">
+                  Nenhum email encontrado
+                </Text>
+              </div>
+              <div className="empty-state-subtitle">
+                <Text type="secondary">
+                  {searchText ? 'Tente ajustar sua pesquisa' : 'Adicione alguns emails para começar'}
+                </Text>
+              </div>
+            </div>
+          )
+        }}
       />
-    </Flex>
+        </Flex>
+      </Card>
+    </div>
   );
 };
 
