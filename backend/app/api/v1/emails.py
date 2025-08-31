@@ -1,5 +1,5 @@
 """Endpoints da API para submissão e listagem de emails."""
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Query
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form, Query
 from sqlalchemy.orm import Session
 from typing import Optional
 
@@ -8,7 +8,6 @@ from app.schemas.email import (
     EmailSubmissionResponse, 
     EmailSubmissionList, 
     TextEmailRequest, 
-    FileEmailRequest,
     DeleteEmailsRequest,
     DeleteEmailsResponse
 )
@@ -58,7 +57,7 @@ async def submit_text_email(
 
 @router.post("/file", response_model=EmailSubmissionResponse, status_code=status.HTTP_201_CREATED)
 async def submit_file_email(
-    request: FileEmailRequest,
+    email_title: str = Form(..., description="Título do email"),
     file: UploadFile = File(..., description="Arquivo .txt ou .pdf"),
     db: Session = Depends(get_db_session)
 ):
@@ -66,17 +65,17 @@ async def submit_file_email(
     Cria uma nova submissão de email a partir de arquivo (.txt ou .pdf).
     
     Parâmetros:
-    - request: dados do email (email_title)
+    - email_title: título do email
     - file: arquivo .txt ou .pdf contendo o conteúdo do email
     """
     try:
-        if not request.email_title:
+        if not email_title:
             raise ValueError("Título é obrigatório")
             
         email_repository = EmailRepository(db)
         service = EmailService(email_repository, OpenAIIntegration())
         result = await service.submit_file_email(
-            email_title=request.email_title,
+            email_title=email_title,
             file=file
         )
         return result

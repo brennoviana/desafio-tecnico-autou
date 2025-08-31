@@ -78,7 +78,7 @@ class EmailService:
                 type=file_type
             )
             
-            ai_result = await self.ai_integration.classify_email(email_data.content)
+            ai_result = self.ai_integration.classify_email(email_data.content)
 
             submission = self.email_repository.create(email_data, ai_result)
             return EmailSubmissionResponse.model_validate(submission)

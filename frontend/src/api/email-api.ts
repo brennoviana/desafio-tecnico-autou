@@ -34,6 +34,40 @@ export class EmailApi  {
 
     return response.json();
   }
+
+  async createEmailText(email_title: string, content: string): Promise<EmailSubmissionResponse> {
+    const response = await fetch(`${this.baseUrl}/emails/text`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email_title, content })
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return response.json();
+  }
+
+  async createEmailFile(email_title: string, file: File): Promise<EmailSubmissionResponse> {
+    const formData = new FormData();
+    formData.append('email_title', email_title);
+    formData.append('file', file);
+
+    const response = await fetch(`${this.baseUrl}/emails/file`, {
+      method: 'POST',
+      body: formData // FormData não precisa de Content-Type header
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ detail: 'Erro desconhecido' }));
+      throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
+    }
+
+    return response.json();
+  }
 }
 
 export interface EmailResponse {
@@ -47,6 +81,16 @@ export interface EmailResponse {
   created_at: string;
   }[];
   total: number;
+}
+
+export interface EmailSubmissionResponse {
+  id: number;
+  email_title: string;
+  message: string;
+  type: string;
+  ai_classification: string;
+  ai_suggested_reply: string;
+  created_at: string;
 }
 
 export interface DeleteEmailsResponse {

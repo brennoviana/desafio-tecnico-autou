@@ -48,7 +48,7 @@ const MainComponent: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [dataSource, setDataSource] = useState<EmailType[]>([]);
   const [searchText, setSearchText] = useState('');
-  const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [searchTimeout, setSearchTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 5,
@@ -88,6 +88,10 @@ const MainComponent: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleEmailAdded = () => {
+    fetchData(pagination.current, pagination.pageSize, searchText);
   };
 
   const debouncedSearch = useCallback((value: string) => {
@@ -151,9 +155,7 @@ const MainComponent: React.FC = () => {
     try {
       const selectedIds = selectedRowKeys.map(key => Number(key));
       
-      
       const result = await emailApi.deleteEmails(selectedIds);
-      
       
       if (result.deleted_count > 0) {
         message.success(`${result.deleted_count} email(s) deletado(s) com sucesso`);
@@ -194,7 +196,7 @@ const MainComponent: React.FC = () => {
               Deletar ({selectedRowKeys.length})
             </Button>
             ) : (
-              <ModalComponent />
+              <ModalComponent onEmailAdded={handleEmailAdded} />
           )}
         </Flex>
         
