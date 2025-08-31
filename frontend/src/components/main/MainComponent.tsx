@@ -394,21 +394,6 @@ const MainComponent: React.FC = () => {
       {/* Card principal com a tabela */}
       <Card 
         className="main-table-card"
-        title={
-          <Space>
-            <MailOutlined />
-            <span>Lista de Emails ({pagination.total} total)</span>
-          </Space>
-        }
-        extra={
-          <Space>
-            {hasSelected && (
-              <Text type="secondary">
-                {selectedRowKeys.length} item(s) selecionado(s)
-              </Text>
-            )}
-          </Space>
-        }
       >
         <Flex gap="middle" vertical>
           <Flex align="center" gap="middle" justify="space-between">
@@ -459,12 +444,8 @@ const MainComponent: React.FC = () => {
           ...pagination,
           onChange: handleTableChange,
           onShowSizeChange: handleTableChange,
-          showQuickJumper: true,
           locale: {
             items_per_page: '/ página',
-            page: 'página',
-            jump_to: 'Ir para',
-            jump_to_confirm: 'confirmar'
           }
         }}
         locale={{

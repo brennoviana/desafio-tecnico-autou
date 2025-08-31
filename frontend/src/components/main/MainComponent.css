@@ -34,6 +34,11 @@
   border-radius: 8px;
 }
 
+.ant-table-container {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
 .table-row-light {
   background-color: #fafafa;
 }
