@@ -45,7 +45,13 @@ Sistema web para classificação automática de emails utilizando Inteligência 
 ### 1. Clone o repositório
 
 ### 2. Configure as variáveis de ambiente
-Crie um arquivo `.env` na raiz do projeto:
+Copie o arquivo `.env.docker.example` para `.env` e configure as variáveis:
+
+```bash
+cp .env.docker.example .env
+```
+
+**⚠️ Importante**: Para obter a chave da API OpenAI, entre em contato comigo, pois este repositório é público e não posso expor a chave.
 
 ### 3. Execute o projeto
 ```bash
