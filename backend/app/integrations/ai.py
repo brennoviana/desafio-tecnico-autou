@@ -24,6 +24,28 @@ class OpenAIIntegration:
     def __init__(self):
         """Inicializa o serviço de IA com a configuração da API."""
         self.client = OpenAI(api_key=settings.openai_api_key)
+        self.training_examples = [
+            {
+                "email": "Preciso de ajuda com o sistema que não está funcionando",
+                "classification": "PRODUTIVO",
+                "reply": "Recebemos sua solicitação de suporte. Nossa equipe técnica irá analisar o problema e retornar em até 24 horas com uma solução."
+            },
+            {
+                "email": "Obrigado pelo excelente atendimento da equipe",
+                "classification": "IMPRODUTIVO", 
+                "reply": "Nenhuma ação necessária"
+            },
+            {
+                "email": "Quando será lançada a nova versão do sistema?",
+                "classification": "PRODUTIVO",
+                "reply": "Obrigado pela pergunta. A nova versão está prevista para lançamento no próximo trimestre. Manteremos você informado sobre atualizações."
+            },
+            {
+                "email": "Parabéns pelo sucesso do projeto!",
+                "classification": "IMPRODUTIVO",
+                "reply": "Nenhuma ação necessária"
+            }
+        ]
 
     def classify_email(self, email_text: str) -> Dict[str, Any]:
         """
@@ -43,21 +65,8 @@ class OpenAIIntegration:
         try:
             processed_text = self._preprocess_text(email_text, advanced_preprocessing=True)
 
-            prompt = f"""
-            Classifique o seguinte email como PRODUTIVO ou IMPRODUTIVO, de acordo com as definições abaixo:
-
-            - PRODUTIVO: Emails que requerem ação ou resposta específica (ex.: solicitações de suporte, atualização sobre casos em aberto, dúvidas sobre o sistema).
-            - IMPRODUTIVO: Emails que não necessitam de ação imediata (ex.: felicitações, agradecimentos).
-
-            Depois de classificar, sugira uma resposta automática apenas se for PRODUTIVO. 
-            Se for IMPRODUTIVO, indique que não é necessária ação.
-
-            Formato de resposta:
-            Categoria: <Produtivo/Improdutivo>
-            Sugestão de resposta: <texto ou "Nenhuma ação necessária">
-
-            Email: "{processed_text}"
-            """
+            # Usa prompt dinâmico baseado nos exemplos de treinamento atuais
+            prompt = self._build_dynamic_prompt(processed_text)
 
             response: ChatCompletion = self.client.chat.completions.create(
                 model="gpt-4",
@@ -141,3 +150,35 @@ class OpenAIIntegration:
             return " ".join(tokens)
         
         return text.strip()
+
+    def _build_dynamic_prompt(self, email_text: str) -> str:
+        """
+        Constrói prompt dinâmico usando os exemplos de treinamento.
+        """
+        examples_text = ""
+        for example in self.training_examples:
+            examples_text += f"""
+            Email: "{example['email']}"
+            Categoria: {example['classification']}
+            Sugestão de resposta: "{example['reply']}"
+            """
+        
+        return f"""
+        Você é um assistente especializado em classificação de emails corporativos.
+        Você foi treinado com {len(self.training_examples)} exemplos de feedback.
+
+        DEFINIÇÕES:
+        - PRODUTIVO: Emails que requerem ação ou resposta específica
+        - IMPRODUTIVO: Emails que não necessitam de ação imediata
+
+        EXEMPLOS DE TREINAMENTO (baseados em feedback real):
+        {examples_text}
+
+        AGORA CLASSIFIQUE O EMAIL ABAIXO:
+
+        Email: "{email_text}"
+
+        Formato de resposta:
+        Categoria: <PRODUTIVO/IMPRODUTIVO>
+        Sugestão de resposta: <texto ou "Nenhuma ação necessária">
+        """
