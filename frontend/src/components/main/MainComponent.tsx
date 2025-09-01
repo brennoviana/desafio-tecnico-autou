@@ -317,7 +317,6 @@ const MainComponent: React.FC = () => {
 
   return (
     <div className="main-container">
-      {/* Cabeçalho com título */}
       <Card className="main-header-card">
         <Title level={2} className="main-title">
           <MailOutlined style={{ marginRight: '8px' }} />
@@ -328,7 +327,6 @@ const MainComponent: React.FC = () => {
         </Text>
       </Card>
 
-      {/* Cards de estatísticas */}
       <Row gutter={[16, 16]} className="main-stats-row">
         <Col xs={24} sm={12} md={8} lg={4}>
           <Card>
@@ -391,7 +389,6 @@ const MainComponent: React.FC = () => {
         </Col>
       </Row>
 
-      {/* Card principal com a tabela */}
       <Card 
         className="main-table-card"
       >
