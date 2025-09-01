@@ -65,7 +65,6 @@ class OpenAIIntegration:
         try:
             processed_text = self._preprocess_text(email_text, advanced_preprocessing=True)
 
-            # Usa prompt dinâmico baseado nos exemplos de treinamento atuais
             prompt = self._build_dynamic_prompt(processed_text)
 
             response: ChatCompletion = self.client.chat.completions.create(
