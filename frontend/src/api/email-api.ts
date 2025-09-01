@@ -1,7 +1,7 @@
 export class EmailApi  {
   private baseUrl: string;
   constructor() {
-    this.baseUrl = import.meta.env.VITE_API_BASE_URL || '/api/v1';
+    this.baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
   }
 
   async getEmails(skip: number, limit: number) : Promise<EmailResponse> {
