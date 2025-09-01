@@ -58,7 +58,7 @@ export class EmailApi  {
 
     const response = await fetch(`${this.baseUrl}/emails/file`, {
       method: 'POST',
-      body: formData // FormData não precisa de Content-Type header
+      body: formData
     });
 
     if (!response.ok) {
@@ -70,7 +70,7 @@ export class EmailApi  {
   }
 
   async getEmailStats(): Promise<EmailStatsResponse> {
-    const response = await fetch(`${this.baseUrl}/emails/stats/`);
+    const response = await fetch(`${this.baseUrl}/emails/stats`);
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
