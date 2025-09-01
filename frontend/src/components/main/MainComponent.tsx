@@ -437,9 +437,6 @@ const MainComponent: React.FC = () => {
         dataSource={dataSource}
         loading={loading}
         scroll={{ x: 1200 }}
-        rowClassName={(_, index) => 
-          index % 2 === 0 ? 'table-row-light' : 'table-row-dark'
-        }
         pagination={{
           ...pagination,
           onChange: handleTableChange,

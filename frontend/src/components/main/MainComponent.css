@@ -41,12 +41,23 @@
 
 .table-row-light {
   background-color: #fafafa;
+  transition: background-color 0.2s ease;
 }
 
 .table-row-dark {
   background-color: #ffffff;
+  transition: background-color 0.2s ease;
 }
 
+.ant-table-tbody > tr:hover > td {
+  background-color: #e6e6e6 !important;
+  cursor: pointer;
+}
+
+.ant-table-tbody > tr.table-row-light:hover > td,
+.ant-table-tbody > tr.table-row-dark:hover > td {
+  background-color: #e6e6e6 !important;
+}
 
 
 /* Cabeçalho da tabela */
