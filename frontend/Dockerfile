@@ -10,4 +10,4 @@ COPY . .
 
 EXPOSE 5173
 
-CMD ["bun", "run", "dev", "--host", "0.0.0.0"]
+CMD ["bun", "run", "dev"]
