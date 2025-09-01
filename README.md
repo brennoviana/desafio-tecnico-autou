@@ -32,6 +32,8 @@ Sistema web para classificação automática de emails utilizando Inteligência 
 ### DevOps
 - **Docker** - Containerização
 - **Docker Compose** - Orquestração de containers
+- **Nginx** - Proxy reverso com suporte a SSL/HTTPS
+- **Let's Encrypt** - Certificados SSL
 - **Poetry** - Gerenciamento de dependências Python
 
 ## 📋 Pré-requisitos
@@ -62,6 +64,8 @@ docker-compose up -d
 - **Frontend**: http://localhost:5173
 - **Backend API**: http://localhost:8000
 - **Documentação da API**: http://localhost:8000/docs
+
+> 🔒 **Produção**: O sistema está configurado com nginx e certificados SSL para deployment em servidor, proporcionando acesso seguro via HTTPS.
 
 ## 🎯 Como Usar
 

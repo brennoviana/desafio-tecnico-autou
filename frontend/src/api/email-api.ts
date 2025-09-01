@@ -15,12 +15,12 @@ export class EmailApi  {
       limit: limit.toString(),
       email_title: email_title
     });
-    const response = await fetch(`${this.baseUrl}/emails?${params}`);
+    const response = await fetch(`${this.baseUrl}/emails/?${params}`);
     return response.json();
   }
 
   async deleteEmails(ids: number[]): Promise<DeleteEmailsResponse> {
-    const response = await fetch(`${this.baseUrl}/emails`, {
+    const response = await fetch(`${this.baseUrl}/emails/`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
@@ -70,7 +70,7 @@ export class EmailApi  {
   }
 
   async getEmailStats(): Promise<EmailStatsResponse> {
-    const response = await fetch(`${this.baseUrl}/emails/stats`);
+    const response = await fetch(`${this.baseUrl}/emails/stats/`);
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);

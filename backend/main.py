@@ -16,9 +16,10 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 
+# CORS é gerenciado pelo nginx em produção
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=["*"],  # Nginx já filtra as origens
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
