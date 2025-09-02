@@ -2,10 +2,10 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { Button, Flex, Table, Input, message, Card, Tag, Typography, Tooltip, Space, Statistic, Row, Col } from 'antd';
 import { DeleteOutlined, SearchOutlined, MailOutlined, RobotOutlined, FileTextOutlined, FilePdfOutlined, ClockCircleOutlined, CheckCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import type { TableColumnsType } from 'antd';
-import ModalComponent from '../modal/ModalComponent';
-import { EmailApi } from '../../api/email-api';
-import type { EmailStatsResponse } from '../../api/email-api';
-import './MainComponent.css';
+import ModalComponent from '../components/modal/ModalComponent';
+import { EmailApi } from '../api/email-api';
+import type { EmailStatsResponse } from '../api/email-api';
+import '../styles/MainPage.css';
 
 const { Search } = Input;
 const { Title, Text } = Typography;
@@ -156,7 +156,7 @@ const columns: TableColumnsType<EmailType> = [
 
 const emailApi = new EmailApi();
 
-const MainComponent: React.FC = () => {
+const MainPage: React.FC = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [loading, setLoading] = useState(false);
   const [dataSource, setDataSource] = useState<EmailType[]>([]);
@@ -215,6 +215,7 @@ const MainComponent: React.FC = () => {
         total: data.total
       }));
     } catch (error) {
+      console.log(error)
       message.error('Erro ao carregar emails');
     } finally {
       setLoading(false);
@@ -303,6 +304,7 @@ const MainComponent: React.FC = () => {
       fetchStats();
       
     } catch (error) {
+      console.log(error)
       message.error('Erro ao deletar emails');
     } finally {
       setLoading(false);
@@ -469,4 +471,4 @@ const MainComponent: React.FC = () => {
   );
 };
 
-export default MainComponent;
+export default MainPage;
