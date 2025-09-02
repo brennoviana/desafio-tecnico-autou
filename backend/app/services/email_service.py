@@ -50,7 +50,7 @@ class EmailService:
             if file_extension not in ['txt', 'pdf']:
                 raise ValueError("Apenas arquivos .txt e .pdf são aceitos")
             
-            FileProcessor.validate_file_size(file, max_size_mb=5)
+            FileProcessor.validate_file_size(file, max_size_mb=1)
             
             if file_extension == 'txt':
                 final_content = FileProcessor._extract_text_from_txt(file)

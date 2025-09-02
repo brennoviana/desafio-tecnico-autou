@@ -76,7 +76,7 @@ class FileProcessor:
             file.file.seek(0)  # Reset file pointer
     
     @staticmethod
-    def validate_file_size(file: UploadFile, max_size_mb: int = 5) -> None:
+    def validate_file_size(file: UploadFile, max_size_mb: int = 1) -> None:
         """
         Valida o tamanho do arquivo.
         

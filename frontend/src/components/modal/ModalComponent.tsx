@@ -21,7 +21,7 @@ const ModalComponent: React.FC<ModalComponentProps> = ({ onEmailAdded }) => {
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [form] = Form.useForm<EmailFormData>();
   const [submitType, setSubmitType] = useState<'text' | 'file'>('text');
-  const [fileList, setFileList] = useState<any[]>([]);
+  const [fileList, setFileList] = useState<File[]>([]);
   const [charCount, setCharCount] = useState(0);
 
   const emailApi = new EmailApi();
@@ -83,7 +83,13 @@ const ModalComponent: React.FC<ModalComponentProps> = ({ onEmailAdded }) => {
       }
       
     } catch (error) {
-      message.error('Erro ao processar email');
+      let errorMessage = 'Erro ao processar email';
+      
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      
+      message.error(errorMessage);
     } finally {
       setConfirmLoading(false);
     }
@@ -106,9 +112,9 @@ const ModalComponent: React.FC<ModalComponentProps> = ({ onEmailAdded }) => {
         return false;
       }
       
-      const isValidSize = file.size / 1024 / 1024 < 5;
+      const isValidSize = file.size / 1024 / 1024 < 1;
       if (!isValidSize) {
-        message.error('Arquivo deve ser menor que 5MB!');
+        message.error('Arquivo deve ser menor que 1MB!');
         return false;
       }
       
@@ -238,7 +244,7 @@ const ModalComponent: React.FC<ModalComponentProps> = ({ onEmailAdded }) => {
                   Clique ou arraste o arquivo para esta área
                 </p>
                 <p className="ant-upload-hint">
-                  Suporte para arquivos .txt e .pdf (máx. 5MB)
+                  Suporte para arquivos .txt e .pdf (máx. 1MB)
                 </p>
               </Dragger>
             </Form.Item>
