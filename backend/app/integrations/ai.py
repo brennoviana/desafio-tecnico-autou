@@ -106,6 +106,7 @@ class OpenAIIntegration:
             }
 
         except Exception as e:
+            print(f"Erro ao interpretar resposta da IA: {e}")
             return {
                 "classification": "INDEFINIDO",
                 "suggested_reply": "Erro ao interpretar resposta da IA"
