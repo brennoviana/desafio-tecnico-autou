@@ -93,11 +93,11 @@ class OpenAIIntegration:
         """
         try:
             if not ai_response:
-                return {"classification": "INDEFINIDO", "suggested_reply": "Erro no processamento"}
+                return {"classification": "IMPRODUTIVO", "suggested_reply": "Nenhuma sugestão extraída"}
             
             data = json.loads(ai_response)
 
-            classification = data.get("classification", "INDEFINIDO").upper()
+            classification = data.get("classification", "Improdutivo").upper()
             suggested_reply = data.get("suggested_reply", "Nenhuma sugestão extraída")
 
             return {

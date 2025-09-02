@@ -107,18 +107,17 @@ class EmailRepository:
         """
         from sqlalchemy import func, case
         
-        # Query para contar total e estatísticas por classificação
         classification_stats = self.db.query(
             func.count(EmailSubmission.id).label('total'),
             func.sum(
                 case(
-                    (EmailSubmission.ai_classification.ilike('%produtivo%'), 1),
+                    (EmailSubmission.ai_classification.ilike('produtivo'), 1),
                     else_=0
                 )
             ).label('produtivos'),
             func.sum(
                 case(
-                    (EmailSubmission.ai_classification.ilike('%improdutivo%'), 1),
+                    (EmailSubmission.ai_classification.ilike('improdutivo'), 1),
                     else_=0
                 )
             ).label('improdutivos'),

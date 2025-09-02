@@ -55,11 +55,9 @@ class FileProcessor:
     def _extract_text_from_pdf(file: UploadFile) -> str:
         """Extrai texto de arquivo .pdf."""
         try:
-            # Lê o conteúdo do arquivo
             pdf_content = file.file.read()
             pdf_file = io.BytesIO(pdf_content)
             
-            # Usa PyPDF2 para extrair texto
             pdf_reader = PyPDF2.PdfReader(pdf_file)
             
             text_parts = []
