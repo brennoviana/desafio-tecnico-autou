@@ -82,14 +82,28 @@ const columns: TableColumnsType<EmailType> = [
     width: 200
   },
   { 
-    title: <Space><FileTextOutlined />Mensagem</Space>, 
+    title: <Space><FileTextOutlined />Conteúdo</Space>, 
     dataIndex: 'message', 
     sorter: (a, b) => a.message.localeCompare(b.message),
-    render: (text: string) => (
-      <Tooltip title={text}>
-        <Text>{truncateText(text, 40)}</Text>
-      </Tooltip>
-    ),
+    render: (text: string, record: EmailType) => {
+      if (record.type === 'PDF' || record.type === 'TXT') {
+        return (
+          <Tooltip title={`Arquivo: ${text}`}>
+            <Text type="secondary" italic>
+              {truncateText(text, 35)}
+            </Text>
+          </Tooltip>
+        );
+      }
+      
+      return (
+        <Tooltip title={text.length > 400 ? `${text.substring(0, 400)}...` : text}>
+          <Text>
+            {text.length > 50 ? `${text.substring(0, 50)}...` : text}
+          </Text>
+        </Tooltip>
+      );
+    },
     width: 250
   },
   { 
