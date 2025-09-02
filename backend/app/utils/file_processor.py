@@ -89,10 +89,9 @@ class FileProcessor:
         Raises:
             ValueError: Se o arquivo for muito grande
         """
-        # Move para o final para obter o tamanho
         file.file.seek(0, 2)
         file_size = file.file.tell()
-        file.file.seek(0)  # Volta para o início
+        file.file.seek(0)
         
         max_size_bytes = max_size_mb * 1024 * 1024
         if file_size > max_size_bytes:

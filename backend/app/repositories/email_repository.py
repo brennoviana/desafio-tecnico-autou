@@ -27,6 +27,20 @@ class EmailRepository:
         self.db.refresh(db_email)
         return db_email
     
+    def create_with_custom_message(self, email_data: EmailSubmissionCreate, ai_data: Dict[str, Any], message_content: str) -> EmailSubmission:
+        """Cria uma nova submissão de email no banco de dados com conteúdo personalizado no campo message."""
+        db_email = EmailSubmission(
+            email_title=email_data.email_title,
+            message=message_content,
+            type=email_data.type,
+            ai_classification=ai_data.get("classification"),
+            ai_suggested_reply=ai_data.get("suggested_reply")
+        )
+        self.db.add(db_email)
+        self.db.commit()
+        self.db.refresh(db_email)
+        return db_email
+    
     def get_by_id(self, email_id: int) -> Optional[EmailSubmission]:
         """Busca uma submissão de email pelo ID."""
         return self.db.query(EmailSubmission).filter(EmailSubmission.id == email_id).first()

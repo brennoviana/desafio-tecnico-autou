@@ -55,9 +55,11 @@ class EmailService:
             if file_extension == 'txt':
                 final_content = FileProcessor._extract_text_from_txt(file)
                 file_type = "TXT"
+                message_content = file.filename
             elif file_extension == 'pdf':
                 final_content = FileProcessor._extract_text_from_pdf(file)
                 file_type = "PDF"
+                message_content = file.filename
             else:
                 raise ValueError("Tipo de arquivo não suportado")
             
@@ -74,7 +76,12 @@ class EmailService:
             
             ai_result = self.ai_integration.classify_email(email_data.content)
 
-            submission = self.email_repository.create(email_data, ai_result)
+            # Cria a submissão com o nome do arquivo no campo message
+            submission = self.email_repository.create_with_custom_message(
+                email_data, 
+                ai_result, 
+                message_content
+            )
             return EmailSubmissionResponse.model_validate(submission)
             
         except ValueError as e:
