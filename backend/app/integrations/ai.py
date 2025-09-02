@@ -11,8 +11,6 @@ from nltk.stem import RSLPStemmer
 from nltk.tokenize import word_tokenize
 import nltk
 
-from app.core.config import settings
-
 nltk.download('rslp')
 nltk.download('stopwords')
 nltk.download('punkt_tab')
@@ -172,6 +170,7 @@ class OpenAIIntegration:
 
             INSTRUÇÕES IMPORTANTES:
             - Só utilize as categorias PRODUTIVO ou IMPRODUTIVO.
+            - Sempre que houver pedido de contato, reunião ou resposta, classifique como PRODUTIVO.
             - A sugestão de resposta deve ser objetiva e em tom profissional.
             - Responda APENAS no formato JSON abaixo, sem texto extra:
 
