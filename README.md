@@ -11,6 +11,14 @@ Sistema web para classificação automática de emails utilizando Inteligência 
 - **Gerenciamento**: Exclusão em lote e paginação
 - **NLP Avançado**: Pré-processamento com tokenização, stemming e remoção de stopwords
 
+## 🔮 Sugestões de Melhoria
+
+- **Filtro por Classificação**: Filtrar apenas emails produtivos ou improdutivos
+- **Excluir Todos os Improdutivos**: Botão para remover todos os emails improdutivos de uma vez
+- **Marcar Produtivos Respondidos**: Sistema para marcar emails produtivos como já respondidos
+- **Filtro por Data**: Filtrar emails por período específico (últimos 7 dias, 30 dias, mês atual, etc.)
+- **Autenticação**: Sistema de login com usuário e senha, controle de acesso por perfil
+
 ## 🛠 Tecnologias Utilizadas
 
 ### Backend
