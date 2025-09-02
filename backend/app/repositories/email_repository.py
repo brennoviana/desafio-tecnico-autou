@@ -130,23 +130,22 @@ class EmailRepository:
             ).label('nao_classificados')
         ).first()
         
-        # Query para contar por tipo
         type_stats = self.db.query(
             func.sum(
                 case(
-                    (EmailSubmission.type.ilike('%pdf%'), 1),
+                    (EmailSubmission.type.ilike('pdf'), 1),
                     else_=0
                 )
             ).label('pdf'),
             func.sum(
                 case(
-                    (EmailSubmission.type.ilike('%txt%'), 1),
+                    (EmailSubmission.type.ilike('txt'), 1),
                     else_=0
                 )
             ).label('txt'),
             func.sum(
                 case(
-                    (EmailSubmission.type.ilike('%texto puro%'), 1),
+                    (EmailSubmission.type.ilike('texto puro'), 1),
                     else_=0
                 )
             ).label('texto_puro')
