@@ -1,6 +1,6 @@
 """Serviço de IA para classificação e processamento de emails."""
 from typing import Dict, Any
-import re
+import re, json
 from openai import OpenAI
 from openai.types.chat import ChatCompletion
 
@@ -89,35 +89,28 @@ class OpenAIIntegration:
 
     def _parse_ai_response(self, ai_response: str) -> Dict[str, str]:
         """
-        Extrai a classificação e sugestão de resposta da resposta da IA.
-        
-        Args:
-            ai_response: Resposta completa da IA
-            
-        Returns:
-            Dicionário com classificação e sugestão extraídas
+        Extrai a classificação e sugestão de resposta da resposta JSON da IA.
         """
         try:
             if not ai_response:
                 return {"classification": "INDEFINIDO", "suggested_reply": "Erro no processamento"}
             
-            classification_match = re.search(r'Categoria:\s*(Produtivo|Improdutivo|PRODUTIVO|IMPRODUTIVO)', ai_response, re.IGNORECASE)
-            classification = classification_match.group(1).upper() if classification_match else "INDEFINIDO"
-            
-            suggestion_match = re.search(r'Sugestão de resposta:\s*(.+?)(?:\n|$)', ai_response, re.DOTALL)
-            if suggestion_match:
-                suggested_reply = suggestion_match.group(1).strip()
-                suggested_reply = suggested_reply.strip('"').strip("'")
-            else:
-                suggested_reply = "Nenhuma sugestão extraída"
-            
+            data = json.loads(ai_response)
+
+            classification = data.get("classification", "INDEFINIDO").upper()
+            suggested_reply = data.get("suggested_reply", "Nenhuma sugestão extraída")
+
             return {
-                    "classification": classification,
-                    "suggested_reply": suggested_reply
-                }
+                "classification": classification,
+                "suggested_reply": suggested_reply
+            }
+
         except Exception as e:
-            print("Erro ao processar resposta da IA")
-            raise e
+            return {
+                "classification": "INDEFINIDO",
+                "suggested_reply": "Erro ao interpretar resposta da IA"
+            }
+
 
     def _preprocess_text(self, text: str, advanced_preprocessing: bool = False) -> str:
         """
@@ -163,21 +156,26 @@ class OpenAIIntegration:
             """
         
         return f"""
-        Você é um assistente especializado em classificação de emails corporativos.
-        Você foi treinado com {len(self.training_examples)} exemplos de feedback.
+            Você é um assistente especializado em classificação de emails corporativos.
 
-        DEFINIÇÕES:
-        - PRODUTIVO: Emails que requerem ação ou resposta específica
-        - IMPRODUTIVO: Emails que não necessitam de ação imediata
+            DEFINIÇÕES:
+            - PRODUTIVO: Emails que requerem ação ou resposta específica.
+            - IMPRODUTIVO: Emails que não necessitam de ação imediata.
 
-        EXEMPLOS DE TREINAMENTO (baseados em feedback real):
-        {examples_text}
+            EXEMPLOS:
+            {examples_text}
 
-        AGORA CLASSIFIQUE O EMAIL ABAIXO:
+            AGORA CLASSIFIQUE O EMAIL ABAIXO:
 
-        Email: "{email_text}"
+            Email: "{email_text}"
 
-        Formato de resposta:
-        Categoria: <PRODUTIVO/IMPRODUTIVO>
-        Sugestão de resposta: <texto ou "Nenhuma ação necessária">
+            INSTRUÇÕES IMPORTANTES:
+            - Só utilize as categorias PRODUTIVO ou IMPRODUTIVO.
+            - A sugestão de resposta deve ser objetiva e em tom profissional.
+            - Responda APENAS no formato JSON abaixo, sem texto extra:
+
+            {{
+            "classification": "<PRODUTIVO ou IMPRODUTIVO>",
+            "suggested_reply": "<texto ou 'Nenhuma ação necessária'>"
+            }}
         """

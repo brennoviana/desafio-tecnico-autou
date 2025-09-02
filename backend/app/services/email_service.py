@@ -22,12 +22,9 @@ class EmailService:
     ) -> EmailSubmissionResponse:
         """Cria submissão de email a partir de texto direto."""
         try:
-            if not content or not content.strip():
-                raise ValueError("Conteúdo não pode estar vazio")
-            
             email_data = EmailSubmissionCreate(
                 email_title=email_title,
-                content=content.strip(),
+                content=content,
                 type="Texto puro"
             )
             
@@ -35,9 +32,6 @@ class EmailService:
 
             submission = self.email_repository.create(email_data, ai_result)
             return EmailSubmissionResponse.model_validate(submission)
-            
-        except ValueError as e:
-            raise e
         except Exception as e:
             print(f"Erro ao processar email de texto: {str(e)}")
             raise e

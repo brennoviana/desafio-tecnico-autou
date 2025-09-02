@@ -36,11 +36,14 @@ async def submit_text_email(
         if not request.email_title or not request.content:
             raise ValueError("Título e conteúdo são obrigatórios")
         
+        if not request.content or not request.content.strip():
+            raise ValueError("Conteúdo não pode estar vazio")
+
         email_repository = EmailRepository(db)
         service = EmailService(email_repository, OpenAIIntegration())
         result = await service.submit_text_email(
             email_title=request.email_title,
-            content=request.content
+            content=request.content.strip()
         )
         return result
     except ValueError as e:
