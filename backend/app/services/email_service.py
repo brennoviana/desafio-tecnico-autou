@@ -76,7 +76,6 @@ class EmailService:
             
             ai_result = self.ai_integration.classify_email(email_data.content)
 
-            # Cria a submissão com o nome do arquivo no campo message
             submission = self.email_repository.create_with_custom_message(
                 email_data, 
                 ai_result, 

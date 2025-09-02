@@ -48,30 +48,51 @@ const ModalComponent: React.FC<ModalComponentProps> = ({ onEmailAdded }) => {
       setConfirmLoading(true);
       
       if (submitType === 'text') {
-        const values = await form.validateFields();
-        
-        await emailApi.createEmailText(values.email_title, values.content);
-
-        message.success('Email processado com sucesso!');
+        try {
+          const values = await form.validateFields();
+          await emailApi.createEmailText(values.email_title, values.content);
+          message.success('Email processado com sucesso!');
+        } catch (validationError: unknown) {
+          if (validationError && typeof validationError === 'object' && 'errorFields' in validationError) {
+            const error = validationError as { errorFields: Array<{ errors: string[] }> };
+            if (error.errorFields && error.errorFields.length > 0) {
+              const firstError = error.errorFields[0];
+              message.error(firstError.errors[0]);
+              return;
+            }
+          }
+          throw validationError;
+        }
         
       } else if (submitType === 'file') {
-        const values = await form.validateFields(['email_title']);
-        
-        if (fileList.length === 0) {
-          message.error('Selecione um arquivo');
-          return;
-        }
+        try {
+          const values = await form.validateFields(['email_title']);
+          
+          if (fileList.length === 0) {
+            message.error('Selecione um arquivo');
+            return;
+          }
 
-        const file = fileList[0];
-        
-        if (!file || !(file instanceof File)) {
-          message.error('Arquivo inválido. Tente selecionar novamente.');
-          return;
+          const file = fileList[0];
+          
+          if (!file || !(file instanceof File)) {
+            message.error('Arquivo inválido. Tente selecionar novamente.');
+            return;
+          }
+          
+          await emailApi.createEmailFile(values.email_title, file);
+          message.success('Arquivo processado com sucesso!');
+        } catch (validationError: unknown) {
+          if (validationError && typeof validationError === 'object' && 'errorFields' in validationError) {
+            const error = validationError as { errorFields: Array<{ errors: string[] }> };
+            if (error.errorFields && error.errorFields.length > 0) {
+              const firstError = error.errorFields[0];
+              message.error(firstError.errors[0]);
+              return;
+            }
+          }
+          throw validationError;
         }
-        
-        await emailApi.createEmailFile(values.email_title, file);
-
-        message.success('Arquivo processado com sucesso!');
       }
 
       setOpen(false);
@@ -104,7 +125,12 @@ const ModalComponent: React.FC<ModalComponentProps> = ({ onEmailAdded }) => {
   const uploadProps: UploadProps = {
     name: 'file',
     multiple: false,
-    fileList,
+    fileList: fileList.map(file => ({
+      uid: file.name,
+      name: file.name,
+      status: 'done',
+      url: URL.createObjectURL(file),
+    })),
     beforeUpload: (file) => {
       const isValidType = file.type === 'text/plain' || file.type === 'application/pdf';
       if (!isValidType) {

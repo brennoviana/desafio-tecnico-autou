@@ -314,7 +314,13 @@ const MainPage: React.FC = () => {
       }
       
       setSelectedRowKeys([]);
-      await fetchData(pagination.current, pagination.pageSize, searchText);
+      
+      if (pagination.current > 1 && pagination.total - result.deleted_count <= (pagination.current - 1) * pagination.pageSize) {
+        handleTableChange(pagination.current - 1, pagination.pageSize);
+      } else {
+        fetchData(pagination.current, pagination.pageSize, searchText);
+      }
+      
       fetchStats();
       
     } catch (error) {
