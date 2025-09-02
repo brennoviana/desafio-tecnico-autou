@@ -22,14 +22,25 @@ const ModalComponent: React.FC<ModalComponentProps> = ({ onEmailAdded }) => {
   const [form] = Form.useForm<EmailFormData>();
   const [submitType, setSubmitType] = useState<'text' | 'file'>('text');
   const [fileList, setFileList] = useState<any[]>([]);
+  const [charCount, setCharCount] = useState(0);
 
   const emailApi = new EmailApi();
+
+  const countCharsWithoutSpaces = (text: string) => {
+    return text.replace(/\s/g, '').length;
+  };
+
+  const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const text = e.target.value;
+    setCharCount(countCharsWithoutSpaces(text));
+  };
 
   const showModal = () => {
     setOpen(true);
     form.resetFields();
     setFileList([]);
     setSubmitType('text');
+    setCharCount(0);
   };
 
   const handleOk = async () => {
@@ -154,11 +165,24 @@ const ModalComponent: React.FC<ModalComponentProps> = ({ onEmailAdded }) => {
             label="Título do Email"
             rules={[
               { required: true, message: 'Título é obrigatório!' },
-              { min: 2, message: 'Título deve ter pelo menos 2 caracteres!' },
-              { max: 255, message: 'Título deve ter no máximo 255 caracteres!' }
+              {
+                validator: (_, value) => {
+                  if (!value) return Promise.resolve();
+                  const charCount = countCharsWithoutSpaces(value);
+                  if (charCount < 2) {
+                    return Promise.reject(new Error('Título deve ter pelo menos 2 caracteres (sem espaços)!'));
+                  }
+                  if (charCount > 255) {
+                    return Promise.reject(new Error('Título deve ter no máximo 255 caracteres (sem espaços)!'));
+                  }
+                  return Promise.resolve();
+                }
+              }
             ]}
           >
-            <Input placeholder="Digite o título do email..." />
+            <Input 
+              placeholder="Digite o título do email..." 
+            />
           </Form.Item>
 
           {submitType === 'text' ? (
@@ -167,16 +191,37 @@ const ModalComponent: React.FC<ModalComponentProps> = ({ onEmailAdded }) => {
               label="Conteúdo do Email"
               rules={[
                 { required: true, message: 'Conteúdo é obrigatório!' },
-                { min: 10, message: 'Conteúdo deve ter pelo menos 10 caracteres!' },
-                { max: 10000, message: 'Conteúdo deve ter no máximo 10.000 caracteres!' }
+                {
+                  validator: (_, value) => {
+                    if (!value) return Promise.resolve();
+                    const charCount = countCharsWithoutSpaces(value);
+                    if (charCount < 10) {
+                      return Promise.reject(new Error('Conteúdo deve ter pelo menos 10 caracteres (sem espaços)!'));
+                    }
+                    if (charCount > 10000) {
+                      return Promise.reject(new Error('Conteúdo deve ter no máximo 10.000 caracteres (sem espaços)!'));
+                    }
+                    return Promise.resolve();
+                  }
+                }
               ]}
             >
-              <TextArea 
-                rows={8}
-                placeholder="Digite o conteúdo do email..."
-                showCount
-                maxLength={10000}
-              />
+              <div>
+                <TextArea 
+                  rows={8}
+                  placeholder="Digite o conteúdo do email..."
+                  maxLength={10000}
+                  onChange={handleContentChange}
+                />
+                <div style={{ 
+                  marginTop: 8, 
+                  fontSize: '12px', 
+                  color: '#8c8c8c',
+                  textAlign: 'right' 
+                }}>
+                  {charCount} caracteres (sem espaços)
+                </div>
+              </div>
             </Form.Item>
           ) : (
             <Form.Item
