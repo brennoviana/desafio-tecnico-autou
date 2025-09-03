@@ -157,8 +157,4 @@ O sistema fornece estatísticas
 
 Este projeto está licenciado sob a licença MIT - veja o arquivo [LICENSE](LICENSE) para detalhes.
 
-## 🎥 Demo
-
-[Adicione aqui o link para o vídeo de demonstração ou GIFs mostrando o sistema em funcionamento]
-
 ---
